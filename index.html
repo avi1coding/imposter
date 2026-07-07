@@ -1271,10 +1271,9 @@ function buildRound(cats){
   const n=S.players.length;
   const capMax=Math.max(1,Math.min(3,n-2));
   let numImp=S.randomImposters ? 1+Math.floor(Math.random()*capMax) : Math.min(S.numImposters,capMax);
-  // choose category & word
-  const cat=pickWeightedCat(cats,'Custom Words');   // custom words 3x more likely
-  const pool=poolFor(cat);
-  const pick=pool[Math.floor(Math.random()*pool.length)];
+  // choose category & word (custom-appearance rules applied)
+  const sel=pickWithCustom('word',cats,'Custom Words',poolFor('Custom Words'),poolFor);
+  const cat=sel.category, pick=sel.item;
   // choose imposters
   const idx=[...Array(n).keys()];
   shuffle(idx);
@@ -1514,9 +1513,8 @@ function buildQRound(cats){
   const n=S.players.length;
   const capMax=Math.max(1,Math.min(3,n-2));
   let numImp=S.randomImposters ? 1+Math.floor(Math.random()*capMax) : Math.min(S.numImposters,capMax);
-  const cat=pickWeightedCat(cats,'Custom Questions');   // custom 3x more likely
-  const pool=poolQFor(cat);
-  const pair=pool[Math.floor(Math.random()*pool.length)];
+  const sel=pickWithCustom('questions',cats,'Custom Questions',poolQFor('Custom Questions'),poolQFor);
+  const cat=sel.category, pair=sel.item;
   const idx=[...Array(n).keys()]; shuffle(idx);
   const imposters=new Set(idx.slice(0,numImp));
   S.round={ q:true, category:cat, mainQ:pair.q, impQ:pair.imp, imposters, numImp,
@@ -1674,9 +1672,8 @@ function buildURound(cats){
   const n=S.players.length;
   const capMax=Math.max(1,Math.min(3,n-2));
   let numImp=S.randomImposters ? 1+Math.floor(Math.random()*capMax) : Math.min(S.numImposters,capMax);
-  const cat=pickWeightedCat(cats,'Custom Pairs');   // custom 3x more likely
-  const pool=poolUFor(cat);
-  const pair=pool[Math.floor(Math.random()*pool.length)];
+  const sel=pickWithCustom('undercover',cats,'Custom Pairs',poolUFor('Custom Pairs'),poolUFor);
+  const cat=sel.category, pair=sel.item;
   const swap=Math.random()<0.5;
   const crewWord = swap ? pair.b : pair.a;
   const impWord = swap ? pair.a : pair.b;
@@ -1784,14 +1781,8 @@ function addWCustom(){
   ['wcwLeft','wcwRight','wcwMain','wcwImp'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('wcwLeft').focus(); renderWCustom(); save();
 }
-function poolW(){
-  let pool=[];
-  selectedWCategoryNames().forEach(c=>{
-    if(c==='Custom Scales'){ for(let k=0;k<3;k++) pool=pool.concat(S.customWavelength); }  // custom weighted 3x
-    else pool=pool.concat(WDATA[c]||[]);
-  });
-  return pool;
-}
+function poolWFor(c){ return c==='Custom Scales' ? S.customWavelength : (WDATA[c]||[]); }
+function poolW(){ let pool=[]; selectedWCategoryNames().forEach(c=>{ pool=pool.concat(poolWFor(c)); }); return pool; }
 function startWGame(){
   const err=document.getElementById('wsetupErr');
   if(S.players.length<3){err.textContent='Add at least 3 players.';return;}
@@ -1802,8 +1793,8 @@ function buildWRound(){
   const n=S.players.length;
   const capMax=Math.max(1,Math.min(3,n-2));
   let numImp=S.randomImposters ? 1+Math.floor(Math.random()*capMax) : Math.min(S.numImposters,capMax);
-  const pool=poolW();
-  const s=pool[Math.floor(Math.random()*pool.length)];
+  const sel=pickWithCustom('wavelength',selectedWCategoryNames(),'Custom Scales',S.customWavelength,poolWFor);
+  const s=sel.item;
   const idx=[...Array(n).keys()]; shuffle(idx);
   const imposters=new Set(idx.slice(0,numImp));
   S.round={ w:true, left:s.left, right:s.right, main:s.main, imp:s.imp, imposters, numImp,
@@ -1887,7 +1878,49 @@ go=function(id){ _go(id); if(id==='play') renderPlay(); if(id==='results') rende
 
 /* ================= HELPERS ================= */
 function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
-function pickWeightedCat(cats,customName){ const w=[]; cats.forEach(c=>{ const k=(c===customName)?3:1; for(let j=0;j<k;j++) w.push(c); }); return w[Math.floor(Math.random()*w.length)]; }
+/* ===== custom-entry appearance rules =====
+   0 custom: normal.  1-4 custom: each custom item is 5x a normal item, and each
+   custom must appear at least once every (N*25) rounds.  5+ custom: probability
+   schedule below by x = rounds since the last custom, guaranteed within 10. */
+const CUSTOM_PROB=[0,0.02,0.04,0.07,0.08,0.10,0.13,0.13,0.16,0.20,0.20];
+const _csince={}, _clast={}, _cround={};
+function _customKey(mode,e){
+  if(mode==='word') return e.w;
+  if(mode==='questions') return e.q;
+  if(mode==='undercover') return e.a+'|'+e.b;
+  return (e.left||'')+'|'+(e.main||'')+'|'+(e.imp||''); // wavelength
+}
+function _pickNonCustom(cats,poolFn){   // uniform over non-custom items (category weighted by size)
+  const sizes=cats.map(c=>poolFn(c).length), total=sizes.reduce((a,b)=>a+b,0);
+  let r=Math.random()*total;
+  for(let i=0;i<cats.length;i++){ if(r<sizes[i]){ const p=poolFn(cats[i]); return {category:cats[i],item:p[Math.floor(Math.random()*p.length)]}; } r-=sizes[i]; }
+  const c=cats[cats.length-1], p=poolFn(c); return {category:c,item:p[Math.floor(Math.random()*p.length)]};
+}
+function pickWithCustom(mode,cats,customCat,customEntries,poolFn){
+  const nonCustom=cats.filter(c=>c!==customCat);
+  const N=(cats.includes(customCat))?customEntries.length:0;
+  if(N===0) return _pickNonCustom(nonCustom.length?nonCustom:cats, poolFn);       // no custom in play
+  if(!nonCustom.length) return {category:customCat,item:customEntries[Math.floor(Math.random()*N)]}; // only custom
+  if(N<5){
+    _cround[mode]=(_cround[mode]||0)+1; const now=_cround[mode], maxGap=N*25;
+    const seen=_clast[mode]||(_clast[mode]={});
+    let due=-1, worst=-1;
+    for(let i=0;i<N;i++){ const g=now-(seen[_customKey(mode,customEntries[i])]||0); if(g>=maxGap && g>worst){ worst=g; due=i; } }
+    let ch;
+    if(due>=0) ch={category:customCat,item:customEntries[due]};                    // overdue -> force
+    else{
+      const ncCount=nonCustom.reduce((s,c)=>s+poolFn(c).length,0);
+      if(Math.random()*(N*5+ncCount) < N*5) ch={category:customCat,item:customEntries[Math.floor(Math.random()*N)]};
+      else ch=_pickNonCustom(nonCustom,poolFn);
+    }
+    if(ch.category===customCat) seen[_customKey(mode,ch.item)]=now;
+    return ch;
+  }
+  const x=(_csince[mode]||0)+1, p=CUSTOM_PROB[Math.min(x,10)];                      // N>=5: schedule
+  if(x>=10 || Math.random()<p){ _csince[mode]=0; return {category:customCat,item:customEntries[Math.floor(Math.random()*N)]}; }
+  _csince[mode]=x;
+  return _pickNonCustom(nonCustom,poolFn);
+}
 function initial(n){ n=(n||'').trim(); return n?n[0].toUpperCase():'?'; }
 function escapeHtml(s){ return (s+'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escapeAttr(s){ return escapeHtml(s); }
