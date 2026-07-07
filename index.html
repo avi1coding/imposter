@@ -310,9 +310,9 @@
   .tap .i svg{width:18px;height:18px;}
 
   /* ===== questions mode ===== */
-  .modeseg{display:flex;gap:6px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:5px;}
-  .modeseg-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;border:none;background:transparent;color:var(--muted);
-    font-size:15px;font-weight:750;padding:12px;border-radius:12px;cursor:pointer;transition:all .15s;}
+  .modeseg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:5px;}
+  .modeseg-btn{display:flex;align-items:center;justify-content:center;gap:7px;border:none;background:transparent;color:var(--muted);
+    font-size:14.5px;font-weight:750;padding:12px 8px;border-radius:12px;cursor:pointer;transition:all .15s;}
   .modeseg-btn .i svg{width:17px;height:17px;}
   .modeseg-btn.on{background:linear-gradient(120deg,var(--accent2),var(--accent));color:#fff;box-shadow:0 6px 16px rgba(124,58,237,.4);}
   .secretbox .qtext{font-size:23px;font-weight:800;color:#fff;line-height:1.28;animation:pop .4s ease;text-shadow:0 2px 16px rgba(0,0,0,.4);padding:0 4px;}
@@ -335,6 +335,26 @@
   .qpair-lbl{display:block;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
   .qpair-row.imp .qpair-lbl{color:var(--bad);}
   .qpair-q{display:block;font-size:16.5px;font-weight:700;line-height:1.3;}
+
+  /* ===== wavelength ===== */
+  .wslider{-webkit-appearance:none;appearance:none;width:100%;height:12px;border-radius:999px;
+    background:linear-gradient(90deg,#7c3aed,#e879f9);outline:none;margin:4px 0;}
+  .wslider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:32px;height:32px;border-radius:50%;background:#fff;
+    border:3px solid var(--accent);cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.4);}
+  .wslider::-moz-range-thumb{width:32px;height:32px;border-radius:50%;background:#fff;border:3px solid var(--accent);cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.4);}
+  .spec-ends{display:flex;justify-content:space-between;margin-top:12px;font-size:13.5px;font-weight:800;}
+  .spec-ends span:first-child{color:#c084fc;} .spec-ends span:last-child{color:#f0abfc;}
+  .spectrum-view{background:var(--card);border:1px solid var(--card-border);border-radius:18px;padding:15px 16px 12px;box-shadow:var(--shadow);}
+  .spec-ends2{display:flex;justify-content:space-between;font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;gap:8px;}
+  .spec-ends2 span{max-width:45%;}
+  .spec-ends2 span:last-child{text-align:right;}
+  .spec-line{position:relative;height:104px;margin-top:12px;border-radius:12px;
+    background:linear-gradient(90deg,rgba(124,58,237,.28),rgba(232,121,249,.28));}
+  .spec-line::before{content:"";position:absolute;left:8px;right:8px;top:50%;height:2px;background:rgba(255,255,255,.25);transform:translateY(-50%);}
+  .spec-dot{position:absolute;transform:translateX(-50%);transition:left .3s ease;}
+  .spec-dot .sd{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;color:#fff;
+    background:radial-gradient(circle at 35% 30%,#a78bfa,#7c3aed 60%,#4c1d95);border:2px solid rgba(255,255,255,.55);box-shadow:0 2px 6px rgba(0,0,0,.35);}
+  .spec-dot.imp .sd{background:radial-gradient(circle at 35% 30%,#fda4af,#e11d48);border-color:#fff;}
 </style>
 </head>
 <body>
@@ -350,12 +370,14 @@
     <div style="text-align:center;">
       <div class="brandmark"><span class="i" data-icon="mask" data-size="54"></span></div>
       <h1 class="brand">IMPOSTER</h1>
-      <p class="tagline" id="tagline">One word. One faker. Find them.</p>
+      <p class="tagline" id="tagline">Everyone gets the same word, except the imposter. Find out who they are.</p>
     </div>
     <div class="spacer"></div>
     <div class="modeseg" id="modeSeg">
       <button class="modeseg-btn on" data-mode="word" onclick="setMode('word')"><span class="i" data-icon="grid" data-size="17"></span>Words</button>
       <button class="modeseg-btn" data-mode="questions" onclick="setMode('questions')"><span class="i" data-icon="chat" data-size="17"></span>Questions</button>
+      <button class="modeseg-btn" data-mode="undercover" onclick="setMode('undercover')"><span class="i" data-icon="mask" data-size="17"></span>Undercover</button>
+      <button class="modeseg-btn" data-mode="wavelength" onclick="setMode('wavelength')"><span class="i" data-icon="slider" data-size="17"></span>Wavelength</button>
     </div>
     <div class="stack" style="margin-top:14px;">
       <button class="btn btn-primary" onclick="startRound()"><span class="i" data-icon="play" data-size="20"></span>Start Round</button>
@@ -383,11 +405,31 @@
     <div class="card" id="rulesQ" style="display:none;">
       <ul class="rules-list">
         <li><div><b>Everyone gets a question</b><p>A random category and question are chosen. Most players get the same question.</p></div></li>
-        <li><div><b>…except the imposter(s)</b><p>The imposter gets a <b>different</b> question in the same category — one with a similar-sounding answer.</p></div></li>
+        <li><div><b>…except the imposter(s)</b><p>The imposter secretly gets a <b>different</b> question in the same category — with a similar-sounding answer. They don't even know they're the imposter!</p></div></li>
         <li><div><b>Pass, reveal &amp; answer</b><p>Tap your card, reveal your question, type a short answer, then pass the phone on.</p></div></li>
         <li><div><b>Answers revealed</b><p>Once everyone's answered, the real question and all the answers are shown together.</p></div></li>
         <li><div><b>Spot the odd one out</b><p>The imposter answered a different question — so their answer won't quite fit. Discuss and vote.</p></div></li>
         <li><div><b>Reveal</b><p>See who the imposter was and the sneaky question they actually had.</p></div></li>
+      </ul>
+    </div>
+    <div class="card" id="rulesU" style="display:none;">
+      <ul class="rules-list">
+        <li><div><b>Everyone gets a word</b><p>A random category and word are chosen — most players get the same word.</p></div></li>
+        <li><div><b>…except the imposter(s)</b><p>The imposter secretly gets a <b>closely related</b> word (Dog vs Wolf, Coffee vs Tea). They don't know it's different!</p></div></li>
+        <li><div><b>Pass &amp; peek</b><p>Tap your card, reveal your word, then pass the phone on.</p></div></li>
+        <li><div><b>Describe your word</b><p>Going clockwise, each player says one word about theirs — the imposter's clues will drift off.</p></div></li>
+        <li><div><b>Discuss &amp; vote</b><p>Whose clues don't match everyone else's word?</p></div></li>
+        <li><div><b>Reveal</b><p>See who the imposter was and the sneaky look-alike word they had.</p></div></li>
+      </ul>
+    </div>
+    <div class="card" id="rulesW" style="display:none;">
+      <ul class="rules-list">
+        <li><div><b>Everyone gets a scale</b><p>Two opposite ends (like Cheap ↔ Expensive) and one thing to rate on it.</p></div></li>
+        <li><div><b>…except the imposter(s)</b><p>The imposter secretly rates a <b>different</b> thing on the same scale — and doesn't know it.</p></div></li>
+        <li><div><b>Slide &amp; pass</b><p>Reveal your item, drag the slider to where it lands, then pass the phone.</p></div></li>
+        <li><div><b>All dials revealed</b><p>Every player's dot appears on the scale at once.</p></div></li>
+        <li><div><b>Spot the outlier</b><p>The imposter rated something else, so their dot sits in the wrong spot. Discuss and vote.</p></div></li>
+        <li><div><b>Reveal</b><p>See who the imposter was and what they were actually rating.</p></div></li>
       </ul>
     </div>
     <div class="spacer"></div>
@@ -565,7 +607,7 @@
       </div>
     </div>
     <div class="spacer"></div>
-    <button class="btn btn-primary" onclick="go('results')"><span class="i" data-icon="masks" data-size="20"></span>Reveal Results</button>
+    <button class="btn btn-primary" onclick="revealResults()"><span class="i" data-icon="masks" data-size="20"></span>Reveal Results</button>
   </section>
 
   <!-- ============ RESULTS ============ -->
@@ -614,12 +656,8 @@
       </button>
       <div class="card" style="padding:6px 16px;">
         <div class="switch-row">
-          <div class="lbl"><b>Show category to imposter</b><span>Imposter sees which category it is</span></div>
+          <div class="lbl"><b>Show category</b><span>Everyone sees the category name</span></div>
           <div class="switch on" data-opt="showCategoryToImposter" onclick="toggleOpt(this)"><span class="knob"></span></div>
-        </div>
-        <div class="switch-row">
-          <div class="lbl"><b>Imposters know each other</b><span>Multiple imposters see their teammates</span></div>
-          <div class="switch" data-opt="impostersKnowEachOther" onclick="toggleOpt(this)"><span class="knob"></span></div>
         </div>
       </div>
     </div>
@@ -708,6 +746,156 @@
     </div>
   </section>
 
+  <!-- ============ UNDERCOVER: SETUP ============ -->
+  <section id="usetup" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">‹ Home</button>
+      <button class="icon-btn" id="themeBtn4" title="Toggle theme"></button></div>
+    <h2>Undercover Setup</h2>
+    <p class="sub">Everyone gets a word — the imposter gets a look-alike.</p>
+    <div class="stack">
+      <div class="grid2">
+        <button class="tile" onclick="go('players')"><span class="emoji"><span class="i" data-icon="users" data-size="26"></span></span><span class="tt"><b>Players</b><span id="uSumPlayers">4 players</span></span></button>
+        <button class="tile" onclick="go('imposters')"><span class="emoji"><span class="i" data-icon="mask" data-size="26"></span></span><span class="tt"><b>Imposters</b><span id="uSumImp">1 imposter</span></span></button>
+      </div>
+      <button class="tile" onclick="go('ucats')"><span class="emoji"><span class="i" data-icon="grid" data-size="26"></span></span><span class="tt"><b>Categories</b><span id="uSumCats">Select categories to play with</span></span><span class="chev">›</span></button>
+      <button class="tile" onclick="go('ucustom')"><span class="emoji"><span class="i" data-icon="pencil" data-size="26"></span></span><span class="tt"><b>Custom Pairs</b><span id="uSumCustom">Add your own word pairs (optional)</span></span><span class="chev">›</span></button>
+    </div>
+    <div class="err" id="usetupErr"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" onclick="startUGame()">Start Game</button>
+  </section>
+
+  <!-- ============ UNDERCOVER: CATEGORIES ============ -->
+  <section id="ucats" class="screen">
+    <div class="topbar"><button class="back" onclick="go('usetup')">‹ Setup</button><span class="count-pill" id="uccount">0</span></div>
+    <h2>Categories</h2>
+    <p class="sub">Pick any you like. A random word pair comes from one of these.</p>
+    <div class="cats-head"><div class="lead"><b id="uccount2">0</b> selected</div>
+      <div class="seg"><button class="seg-btn" onclick="allUCats(true)">Select all</button><button class="seg-btn" onclick="allUCats(false)">Clear</button></div></div>
+    <div class="catgrid" id="ucatList"></div>
+    <div class="spacer" style="min-height:14px;"></div>
+    <button class="btn btn-primary" onclick="go('usetup')">Done</button>
+  </section>
+
+  <!-- ============ UNDERCOVER: CUSTOM ============ -->
+  <section id="ucustom" class="screen">
+    <div class="topbar"><button class="back" onclick="go('usetup')">‹ Setup</button><span class="count-pill" id="ucwcount">0</span></div>
+    <h2>Custom Pairs</h2>
+    <p class="sub">Two similar words. Most players get the first; the imposter gets the second.</p>
+    <input class="field" id="ucwA" placeholder="Word everyone gets (e.g. Dog)" autocomplete="off" />
+    <input class="field" id="ucwB" placeholder="Imposter's word (e.g. Wolf)" autocomplete="off" style="margin-top:10px;" />
+    <button class="btn btn-ghost" style="margin-top:10px;" onclick="addUCustom()">＋ Add pair</button>
+    <p class="hintline">Enable them by picking “Custom Pairs” in Categories.</p>
+    <div class="plist" id="ucwlist" style="margin-top:8px;"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" onclick="go('usetup')">Done</button>
+  </section>
+
+  <!-- ============ UNDERCOVER: REVEAL ============ -->
+  <section id="urole" class="screen">
+    <div class="topbar"><button class="back" onclick="go('pass')">‹ Back</button><span></span></div>
+    <div class="reveal-wrap">
+      <div class="reveal-name" id="uroleName">The word for —</div>
+      <div class="reveal-cat" id="uroleCat"></div>
+      <div class="secretbox" id="usecretbox" onclick="doUReveal()"><div class="tap"><span class="i" data-icon="eye"></span> Tap to reveal your word</div></div>
+      <div id="uroleExtra"></div>
+    </div>
+    <button class="btn btn-primary" id="uroleDone" style="visibility:hidden;" onclick="finishUReveal()">Done — pass the phone</button>
+  </section>
+
+  <!-- ============ UNDERCOVER: RESULTS ============ -->
+  <section id="uresults" class="screen">
+    <div class="topbar"><span></span><span></span></div>
+    <h2 style="text-align:center;display:flex;align-items:center;justify-content:center;gap:10px;"><span class="i" data-icon="masks" data-size="26" style="color:var(--accent)"></span>The reveal</h2>
+    <div class="imp-reveal" id="uImpReveal" style="margin-top:8px;"></div>
+    <div class="qpair">
+      <div class="qpair-row"><span class="qpair-lbl">Everyone's word</span><span class="qpair-q" id="uResCrew">—</span></div>
+      <div class="qpair-row imp"><span class="qpair-lbl">Imposter's word</span><span class="qpair-q" id="uResImp">—</span></div>
+    </div>
+    <div class="qcat-line" id="uResCat"></div>
+    <div class="spacer"></div>
+    <div class="stack">
+      <button class="btn btn-primary" onclick="newURound()"><span class="i" data-icon="refresh" data-size="20"></span>New Round (same players)</button>
+      <button class="btn btn-ghost" onclick="go('home')"><span class="i" data-icon="home" data-size="20"></span>Home</button>
+    </div>
+  </section>
+
+  <!-- ============ WAVELENGTH: SETUP ============ -->
+  <section id="wsetup" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">‹ Home</button>
+      <button class="icon-btn" id="themeBtn5" title="Toggle theme"></button></div>
+    <h2>Wavelength Setup</h2>
+    <p class="sub">Everyone rates the same thing — the imposter rates a different one.</p>
+    <div class="stack">
+      <div class="grid2">
+        <button class="tile" onclick="go('players')"><span class="emoji"><span class="i" data-icon="users" data-size="26"></span></span><span class="tt"><b>Players</b><span id="wSumPlayers">4 players</span></span></button>
+        <button class="tile" onclick="go('imposters')"><span class="emoji"><span class="i" data-icon="mask" data-size="26"></span></span><span class="tt"><b>Imposters</b><span id="wSumImp">1 imposter</span></span></button>
+      </div>
+      <button class="tile" onclick="go('wcustom')"><span class="emoji"><span class="i" data-icon="pencil" data-size="26"></span></span><span class="tt"><b>Custom Scales</b><span id="wSumCustom">Add your own scenarios (optional)</span></span><span class="chev">›</span></button>
+    </div>
+    <div class="err" id="wsetupErr"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" onclick="startWGame()">Start Game</button>
+  </section>
+
+  <!-- ============ WAVELENGTH: CUSTOM ============ -->
+  <section id="wcustom" class="screen">
+    <div class="topbar"><button class="back" onclick="go('wsetup')">‹ Setup</button><span class="count-pill" id="wcwcount">0</span></div>
+    <h2>Custom Scales</h2>
+    <p class="sub">Two opposite ends, plus two similar items — the imposter rates the second.</p>
+    <div class="inline"><input class="field" id="wcwLeft" placeholder="Left end (e.g. Cheap)" autocomplete="off" /><input class="field" id="wcwRight" placeholder="Right end (e.g. Pricey)" autocomplete="off" /></div>
+    <input class="field" id="wcwMain" placeholder="Everyone's item (e.g. Bicycle)" autocomplete="off" style="margin-top:10px;" />
+    <input class="field" id="wcwImp" placeholder="Imposter's item (e.g. Sports car)" autocomplete="off" style="margin-top:10px;" />
+    <button class="btn btn-ghost" style="margin-top:10px;" onclick="addWCustom()">＋ Add scale</button>
+    <div class="plist" id="wcwlist" style="margin-top:8px;"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" onclick="go('wsetup')">Done</button>
+  </section>
+
+  <!-- ============ WAVELENGTH: REVEAL + SLIDER ============ -->
+  <section id="wrole" class="screen">
+    <div class="topbar"><button class="back" id="wroleBack" onclick="go('pass')">‹ Back</button><span></span></div>
+    <div class="reveal-wrap">
+      <div class="reveal-name" id="wroleName">The item for —</div>
+      <div class="secretbox" id="wsecretbox" onclick="doWReveal()"><div class="tap"><span class="i" data-icon="eye"></span> Tap to reveal your item</div></div>
+      <div id="wsliderWrap" style="display:none;width:min(360px,90vw);margin-top:14px;">
+        <p class="modal-note" style="margin:0 0 6px;">Slide to rate it on the scale</p>
+        <input type="range" min="0" max="100" value="50" id="wSlider" class="wslider" />
+        <div class="spec-ends"><span id="wLeftLbl">Left</span><span id="wRightLbl">Right</span></div>
+        <button class="btn btn-primary" style="margin-top:18px;" onclick="submitWPosition()">Submit &amp; pass</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WAVELENGTH: DISCUSS ============ -->
+  <section id="wdiscuss" class="screen">
+    <div class="topbar"><button class="back" onclick="go('pass')">‹ Back</button><span></span></div>
+    <h2>The dials are in</h2>
+    <p class="sub">Everyone rated…</p>
+    <div class="qbig" id="wDiscussItem">—</div>
+    <div class="spectrum-view" id="wSpectrumView" style="margin-top:14px;"></div>
+    <p class="modal-note">Whose dot doesn't fit? Discuss and vote.</p>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" onclick="go('wresults')"><span class="i" data-icon="masks" data-size="20"></span>Reveal Results</button>
+  </section>
+
+  <!-- ============ WAVELENGTH: RESULTS ============ -->
+  <section id="wresults" class="screen">
+    <div class="topbar"><span></span><span></span></div>
+    <h2 style="text-align:center;display:flex;align-items:center;justify-content:center;gap:10px;"><span class="i" data-icon="masks" data-size="26" style="color:var(--accent)"></span>The reveal</h2>
+    <div class="imp-reveal" id="wImpReveal" style="margin-top:8px;"></div>
+    <div class="qpair">
+      <div class="qpair-row"><span class="qpair-lbl">Everyone rated</span><span class="qpair-q" id="wResMain">—</span></div>
+      <div class="qpair-row imp"><span class="qpair-lbl">Imposter rated</span><span class="qpair-q" id="wResImp">—</span></div>
+    </div>
+    <div class="spectrum-view" id="wResSpectrum" style="margin-top:14px;"></div>
+    <div class="spacer"></div>
+    <div class="stack">
+      <button class="btn btn-primary" onclick="newWRound()"><span class="i" data-icon="refresh" data-size="20"></span>New Round (same players)</button>
+      <button class="btn btn-ghost" onclick="go('home')"><span class="i" data-icon="home" data-size="20"></span>Home</button>
+    </div>
+  </section>
+
 </div>
 
 <script>
@@ -749,6 +937,20 @@ const QCATEGORY_META = [
   ["Custom Questions","pencil"]
 ];
 const QCAT_ICON={};QCATEGORY_META.forEach(([n,ic])=>QCAT_ICON[n]=ic);
+const UDATA = {
+  "Food": [{a:"Donut",b:"Bagel"},{a:"Cookie",b:"Cracker"},{a:"Spaghetti",b:"Macaroni"},{a:"Ice cream",b:"Popsicle"},{a:"Jam",b:"Jelly"},{a:"Butter",b:"Margarine"},{a:"Ketchup",b:"Mustard"},{a:"Mayonnaise",b:"Ranch"},{a:"Soup",b:"Stew"},{a:"Bread",b:"Toast"},{a:"Roll",b:"Bun"},{a:"Croissant",b:"Pretzel"},{a:"Pie",b:"Tart"},{a:"Brownie",b:"Fudge"},{a:"Candy",b:"Chocolate"},{a:"Lollipop",b:"Candy cane"},{a:"Popcorn",b:"Nachos"},{a:"Hot dog",b:"Sausage"},{a:"Bacon",b:"Ham"},{a:"Steak",b:"Roast"},{a:"Chicken",b:"Turkey"},{a:"Beef",b:"Pork"},{a:"Salmon",b:"Tuna"},{a:"Lobster",b:"Crab"},{a:"Egg",b:"Omelette"},{a:"Cheese",b:"Cream"},{a:"Milk",b:"Yogurt"},{a:"Apple",b:"Pear"},{a:"Orange",b:"Tangerine"},{a:"Lemon",b:"Lime"},{a:"Strawberry",b:"Raspberry"},{a:"Blueberry",b:"Blackberry"},{a:"Peach",b:"Apricot"},{a:"Watermelon",b:"Cantaloupe"},{a:"Broccoli",b:"Cauliflower"},{a:"Cucumber",b:"Zucchini"},{a:"Pumpkin",b:"Squash"},{a:"Onion",b:"Garlic"},{a:"Lettuce",b:"Cabbage"},{a:"Spinach",b:"Kale"},{a:"Tomato",b:"Pepper"},{a:"Pea",b:"Bean"},{a:"Potato",b:"Yam"},{a:"Pickle",b:"Olive"},{a:"Dumpling",b:"Wonton"},{a:"Meatball",b:"Meatloaf"},{a:"Nugget",b:"Tender"},{a:"Ribs",b:"Wings"},{a:"Honey",b:"Syrup"},{a:"Smoothie",b:"Milkshake"},{a:"Cereal",b:"Oatmeal"},{a:"Wrap",b:"Quesadilla"},{a:"Chili",b:"Salsa"},{a:"Scone",b:"Biscuit"},{a:"Pasta",b:"Noodles"},{a:"Doughnut",b:"Bagel"},{a:"Croissant",b:"Crescent Roll"},{a:"Pretzel",b:"Breadstick"},{a:"Muffin",b:"Cupcake"},{a:"Brownie",b:"Blondie"},{a:"Pudding",b:"Custard"},{a:"Ketchup",b:"Salsa"},{a:"Mustard",b:"Mayonnaise"},{a:"Cream",b:"Milk"},{a:"Yogurt",b:"Kefir"},{a:"Cheddar",b:"Gouda"},{a:"Mozzarella",b:"Provolone"},{a:"Duck",b:"Goose"},{a:"Shrimp",b:"Prawn"},{a:"Salmon",b:"Trout"},{a:"Tuna",b:"Sardine"},{a:"Noodle",b:"Spaghetti"},{a:"Macaroni",b:"Penne"},{a:"Ravioli",b:"Dumpling"},{a:"Lasagna",b:"Casserole"},{a:"Rice",b:"Quinoa"},{a:"Oatmeal",b:"Porridge"},{a:"Cereal",b:"Granola"},{a:"Cracker",b:"Biscuit"},{a:"Popcorn",b:"Chips"},{a:"Peanut",b:"Almond"},{a:"Walnut",b:"Pecan"},{a:"Raisin",b:"Prune"},{a:"Grape",b:"Cherry"},{a:"Peach",b:"Nectarine"},{a:"Plum",b:"Apricot"},{a:"Cantaloupe",b:"Honeydew"},{a:"Sweet Potato",b:"Yam"},{a:"Onion",b:"Shallot"},{a:"Ginger",b:"Garlic"},{a:"Cinnamon",b:"Nutmeg"},{a:"Sherbet",b:"Ice Cream"}],
+  "Drinks": [{a:"Coffee",b:"Tea"},{a:"Latte",b:"Cappuccino"},{a:"Espresso",b:"Americano"},{a:"Cola",b:"Root Beer"},{a:"Lemonade",b:"Iced Tea"},{a:"Milkshake",b:"Smoothie"},{a:"Orange Juice",b:"Apple Juice"},{a:"Grape Juice",b:"Cranberry Juice"},{a:"Wine",b:"Champagne"},{a:"Beer",b:"Cider"},{a:"Whiskey",b:"Rum"},{a:"Vodka",b:"Gin"},{a:"Water",b:"Sparkling Water"},{a:"Milk",b:"Buttermilk"},{a:"Mocha",b:"Latte"},{a:"Slushie",b:"Frozen Lemonade"},{a:"Chocolate Milk",b:"Strawberry Milk"},{a:"Punch",b:"Sangria"},{a:"Margarita",b:"Daiquiri"},{a:"Mojito",b:"Martini"},{a:"Ginger Ale",b:"Ginger Beer"},{a:"Tonic Water",b:"Club Soda"},{a:"Cranberry Juice",b:"Pomegranate Juice"},{a:"Coconut Water",b:"Coconut Milk"},{a:"Almond Milk",b:"Soy Milk"},{a:"Green Tea",b:"Black Tea"},{a:"Chai",b:"Herbal Tea"},{a:"Hot Chocolate",b:"Warm Milk"},{a:"Cider",b:"Apple Juice"},{a:"Energy Drink",b:"Sports Drink"},{a:"Root Beer",b:"Cream Soda"},{a:"Iced Coffee",b:"Cold Brew"},{a:"Flat White",b:"Macchiato"},{a:"Prosecco",b:"Champagne"},{a:"Sake",b:"Soju"},{a:"Port",b:"Sherry"},{a:"Cocktail",b:"Mocktail"},{a:"Horchata",b:"Lassi"},{a:"Smoothie",b:"Juice"},{a:"Frappe",b:"Milkshake"},{a:"Lemonade",b:"Limeade"},{a:"Cola",b:"Lemon-Lime Soda"},{a:"Cream Soda",b:"Cola"},{a:"Cider",b:"Mulled Wine"},{a:"Brandy",b:"Cognac"},{a:"Ale",b:"Lager"},{a:"Whiskey",b:"Bourbon"},{a:"Tequila",b:"Mezcal"},{a:"Matcha",b:"Green Tea"},{a:"Cappuccino",b:"Macchiato"},{a:"Kombucha",b:"Lemonade"},{a:"Root Beer Float",b:"Milkshake"},{a:"Nectar",b:"Juice"},{a:"Eggnog",b:"Milkshake"},{a:"Bubble Tea",b:"Smoothie"},{a:"Espresso",b:"Cappuccino"},{a:"Latte",b:"Flat White"},{a:"Coffee",b:"Espresso"},{a:"Bubble Tea",b:"Milk Tea"},{a:"Chai",b:"Matcha"},{a:"Orange Juice",b:"Grapefruit Juice"},{a:"Cider",b:"Juice"},{a:"Fruit Punch",b:"Lemonade"},{a:"Sparkling Water",b:"Still Water"},{a:"Oat Milk",b:"Rice Milk"},{a:"Slushie",b:"Snow Cone"},{a:"Milkshake",b:"Malt"},{a:"Cocoa",b:"Coffee"},{a:"Beer",b:"Ale"},{a:"Lager",b:"Stout"},{a:"Margarita",b:"Martini"},{a:"Mojito",b:"Daiquiri"},{a:"Wine",b:"Beer"},{a:"Tap Water",b:"Bottled Water"},{a:"Apple Cider",b:"Apple Juice"},{a:"Iced Coffee",b:"Iced Tea"},{a:"Ginger Tea",b:"Peppermint Tea"},{a:"Pineapple Juice",b:"Mango Juice"},{a:"Tomato Juice",b:"Carrot Juice"},{a:"Coconut Water",b:"Sports Drink"}],
+  "Animals": [{a:"Leopard",b:"Cheetah"},{a:"Jaguar",b:"Panther"},{a:"Donkey",b:"Mule"},{a:"Horse",b:"Pony"},{a:"Goat",b:"Sheep"},{a:"Camel",b:"Llama"},{a:"Deer",b:"Elk"},{a:"Moose",b:"Reindeer"},{a:"Rat",b:"Mouse"},{a:"Squirrel",b:"Chipmunk"},{a:"Otter",b:"Beaver"},{a:"Seal",b:"Walrus"},{a:"Dolphin",b:"Porpoise"},{a:"Octopus",b:"Squid"},{a:"Turtle",b:"Tortoise"},{a:"Lizard",b:"Gecko"},{a:"Butterfly",b:"Moth"},{a:"Bee",b:"Wasp"},{a:"Ant",b:"Termite"},{a:"Crab",b:"Lobster"},{a:"Shrimp",b:"Prawn"},{a:"Duck",b:"Goose"},{a:"Chicken",b:"Turkey"},{a:"Crow",b:"Raven"},{a:"Sparrow",b:"Finch"},{a:"Eagle",b:"Hawk"},{a:"Parrot",b:"Parakeet"},{a:"Penguin",b:"Puffin"},{a:"Pigeon",b:"Dove"},{a:"Kangaroo",b:"Wallaby"},{a:"Gorilla",b:"Chimpanzee"},{a:"Monkey",b:"Baboon"},{a:"Hedgehog",b:"Porcupine"},{a:"Ferret",b:"Weasel"},{a:"Fox",b:"Coyote"},{a:"Hyena",b:"Jackal"},{a:"Rhino",b:"Hippo"},{a:"Antelope",b:"Gazelle"},{a:"Bison",b:"Buffalo"},{a:"Salamander",b:"Newt"},{a:"Snail",b:"Slug"},{a:"Ladybug",b:"Beetle"},{a:"Grasshopper",b:"Cricket"},{a:"Guinea pig",b:"Hamster"},{a:"Goldfish",b:"Koi"},{a:"Tuna",b:"Salmon"},{a:"Iguana",b:"Chameleon"},{a:"Cobra",b:"Python"},{a:"Cougar",b:"Lynx"},{a:"Raccoon",b:"Possum"},{a:"Skunk",b:"Badger"},{a:"Ostrich",b:"Emu"},{a:"Hare",b:"Rabbit"},{a:"Starfish",b:"Jellyfish"},{a:"Woodpecker",b:"Toucan"},{a:"Seal",b:"Sea lion"},{a:"Owl",b:"Hawk"},{a:"Eagle",b:"Falcon"},{a:"Monkey",b:"Ape"},{a:"Chameleon",b:"Gecko"},{a:"Spider",b:"Scorpion"},{a:"Flamingo",b:"Stork"},{a:"Peacock",b:"Turkey"},{a:"Chicken",b:"Rooster"},{a:"Sparrow",b:"Robin"},{a:"Raccoon",b:"Badger"},{a:"Koala",b:"Sloth"},{a:"Elephant",b:"Mammoth"},{a:"Guinea pig",b:"Gerbil"},{a:"Vulture",b:"Buzzard"},{a:"Worm",b:"Caterpillar"}],
+  "Countries": [{a:"Spain",b:"Portugal"},{a:"Norway",b:"Sweden"},{a:"China",b:"Japan"},{a:"India",b:"Pakistan"},{a:"Iran",b:"Iraq"},{a:"Ireland",b:"Iceland"},{a:"Austria",b:"Australia"},{a:"Slovakia",b:"Slovenia"},{a:"North Korea",b:"South Korea"},{a:"Denmark",b:"Finland"},{a:"Belgium",b:"Netherlands"},{a:"Greece",b:"Turkey"},{a:"Argentina",b:"Chile"},{a:"Peru",b:"Bolivia"},{a:"Colombia",b:"Venezuela"},{a:"Thailand",b:"Vietnam"},{a:"Indonesia",b:"Malaysia"},{a:"Cuba",b:"Jamaica"},{a:"Egypt",b:"Morocco"},{a:"Kenya",b:"Nigeria"},{a:"Ethiopia",b:"Somalia"},{a:"Croatia",b:"Serbia"},{a:"Russia",b:"Ukraine"},{a:"Hungary",b:"Romania"},{a:"Romania",b:"Bulgaria"},{a:"France",b:"Germany"},{a:"Switzerland",b:"Austria"},{a:"Italy",b:"Greece"},{a:"Cambodia",b:"Laos"},{a:"India",b:"Bangladesh"},{a:"Nepal",b:"Bhutan"},{a:"Philippines",b:"Indonesia"},{a:"Malaysia",b:"Singapore"},{a:"Sri Lanka",b:"India"},{a:"Ghana",b:"Nigeria"},{a:"Kenya",b:"Tanzania"},{a:"Morocco",b:"Algeria"},{a:"Saudi Arabia",b:"Qatar"},{a:"Israel",b:"Lebanon"},{a:"Syria",b:"Iraq"},{a:"USA",b:"Canada"},{a:"Mexico",b:"Guatemala"},{a:"Ecuador",b:"Peru"},{a:"Uruguay",b:"Paraguay"},{a:"Brazil",b:"Argentina"},{a:"Haiti",b:"Cuba"},{a:"Australia",b:"New Zealand"},{a:"Germany",b:"Poland"},{a:"Sweden",b:"Finland"},{a:"Czech Republic",b:"Slovakia"},{a:"Jordan",b:"Syria"},{a:"Tunisia",b:"Libya"},{a:"Sudan",b:"Egypt"},{a:"Vietnam",b:"Cambodia"},{a:"Chile",b:"Peru"},{a:"Denmark",b:"Norway"},{a:"Egypt",b:"Libya"},{a:"Poland",b:"Ukraine"},{a:"Finland",b:"Estonia"},{a:"Ecuador",b:"Colombia"},{a:"Canada",b:"America"},{a:"Kuwait",b:"Bahrain"},{a:"Lebanon",b:"Syria"},{a:"Jordan",b:"Israel"},{a:"Afghanistan",b:"Pakistan"},{a:"Sri Lanka",b:"Maldives"},{a:"Myanmar",b:"Thailand"},{a:"Zambia",b:"Zimbabwe"},{a:"Uganda",b:"Rwanda"},{a:"Senegal",b:"Mali"},{a:"Tunisia",b:"Morocco"},{a:"Czechia",b:"Slovakia"},{a:"Latvia",b:"Lithuania"},{a:"Belarus",b:"Russia"},{a:"Costa Rica",b:"Panama"},{a:"Honduras",b:"Nicaragua"}],
+  "Furniture": [{a:"Chair",b:"Stool"},{a:"Stool",b:"Bench"},{a:"Sofa",b:"Loveseat"},{a:"Recliner",b:"Armchair"},{a:"Rocking chair",b:"Recliner"},{a:"Armchair",b:"Loveseat"},{a:"Bench",b:"Pew"},{a:"Ottoman",b:"Footstool"},{a:"Stool",b:"Ottoman"},{a:"Chair",b:"Bench"},{a:"High chair",b:"Booster seat"},{a:"Beanbag",b:"Ottoman"},{a:"Sofa",b:"Futon"},{a:"Recliner",b:"Sofa"},{a:"Wardrobe",b:"Bookcase"},{a:"Sofa",b:"Daybed"},{a:"Bench",b:"Ottoman"},{a:"Bed",b:"Cot"},{a:"Crib",b:"Cradle"},{a:"Cradle",b:"Bassinet"},{a:"Bunk bed",b:"Loft bed"},{a:"Bed",b:"Hammock"},{a:"Cot",b:"Hammock"},{a:"Futon",b:"Sofa bed"},{a:"Daybed",b:"Futon"},{a:"Crib",b:"Cot"},{a:"Crib",b:"Bunk bed"},{a:"Sofa bed",b:"Daybed"},{a:"Desk",b:"Table"},{a:"Coffee table",b:"Side table"},{a:"Nightstand",b:"End table"},{a:"Coffee table",b:"Dining table"},{a:"Desk",b:"Workbench"},{a:"Vanity",b:"Desk"},{a:"Side table",b:"Nightstand"},{a:"Dining table",b:"Picnic table"},{a:"Table",b:"Bench"},{a:"Wardrobe",b:"Closet"},{a:"Dresser",b:"Cabinet"},{a:"Cupboard",b:"Cabinet"},{a:"Chest",b:"Trunk"},{a:"Shelf",b:"Cabinet"},{a:"Bookcase",b:"Shelf"},{a:"Nightstand",b:"Dresser"},{a:"Wardrobe",b:"Dresser"},{a:"Cabinet",b:"Sideboard"},{a:"Chest",b:"Cabinet"},{a:"Wardrobe",b:"Cabinet"},{a:"Dresser",b:"Vanity"},{a:"Bookshelf",b:"Cabinet"},{a:"Cupboard",b:"Wardrobe"},{a:"Nightstand",b:"Cabinet"},{a:"Coat rack",b:"Hat stand"},{a:"Lamp",b:"Chandelier"},{a:"Coat rack",b:"Umbrella stand"},{a:"Stool",b:"Bar stool"},{a:"Bean bag",b:"Ottoman"},{a:"Settee",b:"Sofa"},{a:"Loveseat",b:"Recliner"},{a:"Deck chair",b:"Lawn chair"},{a:"Folding chair",b:"Deck chair"},{a:"High chair",b:"Bar stool"},{a:"Coffee table",b:"End table"},{a:"Coffee table",b:"Console table"},{a:"Table",b:"Nightstand"},{a:"Console table",b:"Sideboard"},{a:"Bureau",b:"Desk"},{a:"Bookcase",b:"Cabinet"},{a:"Sideboard",b:"Buffet"},{a:"Hutch",b:"Sideboard"},{a:"Cabinet",b:"Hutch"},{a:"Dresser",b:"Sideboard"},{a:"Filing cabinet",b:"Locker"},{a:"Cabinet",b:"Locker"},{a:"Shelf",b:"Rack"},{a:"Nightstand",b:"Chest"},{a:"Mirror",b:"Vanity"},{a:"Bureau",b:"Dresser"},{a:"Bed",b:"Bunk bed"},{a:"Mattress",b:"Futon"},{a:"Cushion",b:"Pillow"},{a:"Rug",b:"Carpet"}],
+  "Times & Weather": [{a:"Rain",b:"Drizzle"},{a:"Fog",b:"Mist"},{a:"Snow",b:"Sleet"},{a:"Hail",b:"Slush"},{a:"Hurricane",b:"Typhoon"},{a:"Tornado",b:"Cyclone"},{a:"Thunder",b:"Lightning"},{a:"Breeze",b:"Gale"},{a:"Wind",b:"Gust"},{a:"Frost",b:"Dew"},{a:"Ice",b:"Icicle"},{a:"Cloud",b:"Overcast"},{a:"Storm",b:"Squall"},{a:"Blizzard",b:"Snowstorm"},{a:"Drought",b:"Heatwave"},{a:"Rainbow",b:"Sunshine"},{a:"Sunny",b:"Cloudy"},{a:"Damp",b:"Humid"},{a:"Puddle",b:"Flood"},{a:"Monsoon",b:"Downpour"},{a:"Shower",b:"Sprinkle"},{a:"Chilly",b:"Freezing"},{a:"Warm",b:"Hot"},{a:"Cool",b:"Cold"},{a:"Cold snap",b:"Warm spell"},{a:"Smog",b:"Haze"},{a:"Snowflake",b:"Raindrop"},{a:"Whirlwind",b:"Twister"},{a:"Flurry",b:"Snowfall"},{a:"Sunlight",b:"Moonlight"},{a:"Sunrise",b:"Sunset"},{a:"Dawn",b:"Dusk"},{a:"Morning",b:"Evening"},{a:"Afternoon",b:"Night"},{a:"Noon",b:"Midnight"},{a:"Twilight",b:"Nightfall"},{a:"Hour",b:"Minute"},{a:"Minute",b:"Second"},{a:"Day",b:"Week"},{a:"Week",b:"Month"},{a:"Month",b:"Year"},{a:"Year",b:"Decade"},{a:"Decade",b:"Century"},{a:"Spring",b:"Summer"},{a:"Autumn",b:"Winter"},{a:"Yesterday",b:"Tomorrow"},{a:"Today",b:"Tonight"},{a:"Weekday",b:"Weekend"},{a:"Clock",b:"Watch"},{a:"Calendar",b:"Diary"},{a:"Sundown",b:"Daybreak"},{a:"Rainstorm",b:"Thunderstorm"},{a:"Lunchtime",b:"Dinnertime"},{a:"Springtime",b:"Summertime"},{a:"Daytime",b:"Nighttime"},{a:"Morning",b:"Afternoon"},{a:"Evening",b:"Night"},{a:"Hurricane",b:"Tornado"},{a:"Storm",b:"Gale"},{a:"Hail",b:"Sleet"},{a:"Breeze",b:"Wind"},{a:"Frost",b:"Ice"},{a:"Cyclone",b:"Typhoon"},{a:"Cloudy",b:"Overcast"},{a:"Humid",b:"Muggy"},{a:"Rainbow",b:"Sunset"},{a:"Summer",b:"Winter"},{a:"Hour",b:"Day"},{a:"Today",b:"Tomorrow"},{a:"Midday",b:"Midnight"},{a:"Twilight",b:"Sunset"},{a:"Shower",b:"Downpour"},{a:"Windy",b:"Breezy"},{a:"Chilly",b:"Cold"},{a:"Freeze",b:"Frost"},{a:"Cloud",b:"Fog"},{a:"Storm",b:"Thunderstorm"},{a:"Sunshine",b:"Daylight"},{a:"Heat",b:"Warmth"},{a:"Icicle",b:"Snowflake"},{a:"Autumn",b:"Spring"},{a:"Gust",b:"Breeze"},{a:"Flood",b:"Drought"},{a:"Rainy",b:"Stormy"},{a:"Foggy",b:"Misty"},{a:"Frosty",b:"Icy"},{a:"Snowy",b:"Frosty"}],
+  "Places": [{a:"Beach",b:"Bay"},{a:"Mountain",b:"Hill"},{a:"Forest",b:"Jungle"},{a:"River",b:"Stream"},{a:"Lake",b:"Pond"},{a:"Desert",b:"Canyon"},{a:"Island",b:"Peninsula"},{a:"Cave",b:"Tunnel"},{a:"Waterfall",b:"Fountain"},{a:"Volcano",b:"Geyser"},{a:"Glacier",b:"Iceberg"},{a:"Cliff",b:"Valley"},{a:"Field",b:"Meadow"},{a:"Ocean",b:"Sea"},{a:"Swamp",b:"Marsh"},{a:"Village",b:"Town"},{a:"City",b:"Suburb"},{a:"Castle",b:"Palace"},{a:"Church",b:"Mosque"},{a:"Cathedral",b:"Chapel"},{a:"Temple",b:"Shrine"},{a:"School",b:"University"},{a:"Library",b:"Museum"},{a:"Hospital",b:"Clinic"},{a:"Restaurant",b:"Diner"},{a:"Cafe",b:"Bakery"},{a:"Hotel",b:"Motel"},{a:"Mall",b:"Market"},{a:"Park",b:"Garden"},{a:"Zoo",b:"Aquarium"},{a:"Airport",b:"Harbor"},{a:"Farm",b:"Ranch"},{a:"Bridge",b:"Dam"},{a:"Tower",b:"Skyscraper"},{a:"Stadium",b:"Arena"},{a:"Theater",b:"Cinema"},{a:"Factory",b:"Warehouse"},{a:"Prison",b:"Dungeon"},{a:"Garage",b:"Shed"},{a:"Barn",b:"Stable"},{a:"Lighthouse",b:"Windmill"},{a:"Pyramid",b:"Tomb"},{a:"Cottage",b:"Cabin"},{a:"Hut",b:"Tent"},{a:"Igloo",b:"Teepee"},{a:"Highway",b:"Road"},{a:"Street",b:"Avenue"},{a:"Alley",b:"Lane"},{a:"Pier",b:"Dock"},{a:"Station",b:"Terminal"},{a:"Playground",b:"Fairground"},{a:"Casino",b:"Arcade"},{a:"Circus",b:"Carnival"},{a:"Vineyard",b:"Orchard"},{a:"Reef",b:"Lagoon"},{a:"Museum",b:"Gallery"},{a:"Bar",b:"Pub"},{a:"Supermarket",b:"Market"},{a:"Bank",b:"Post office"},{a:"Pharmacy",b:"Clinic"},{a:"Gym",b:"Stadium"},{a:"Library",b:"Bookstore"},{a:"Salon",b:"Spa"},{a:"Courthouse",b:"City hall"},{a:"Mansion",b:"Villa"},{a:"Apartment",b:"Condo"},{a:"Castle",b:"Fortress"},{a:"Basement",b:"Attic"},{a:"Balcony",b:"Porch"},{a:"Kitchen",b:"Pantry"},{a:"Bedroom",b:"Bathroom"},{a:"Pool",b:"Pond"},{a:"River",b:"Canal"},{a:"Cliff",b:"Canyon"},{a:"Valley",b:"Meadow"},{a:"Waterfall",b:"Rapids"},{a:"Volcano",b:"Mountain"},{a:"Bay",b:"Cove"},{a:"Desert",b:"Savanna"},{a:"Prairie",b:"Field"},{a:"Cave",b:"Mine"},{a:"Bridge",b:"Overpass"},{a:"Highway",b:"Runway"},{a:"Sidewalk",b:"Crosswalk"},{a:"Bus stop",b:"Train station"},{a:"Subway",b:"Tunnel"},{a:"Fountain",b:"Well"},{a:"Playground",b:"Park"},{a:"Windmill",b:"Watermill"},{a:"Lighthouse",b:"Watchtower"},{a:"Campsite",b:"Picnic area"},{a:"Amusement park",b:"Water park"},{a:"Zoo",b:"Farm"}],
+  "Tools & Instruments": [{a:"Hammer",b:"Mallet"},{a:"Screwdriver",b:"Chisel"},{a:"Wrench",b:"Pliers"},{a:"Saw",b:"Axe"},{a:"Handsaw",b:"Hacksaw"},{a:"Scissors",b:"Shears"},{a:"Knife",b:"Dagger"},{a:"Tweezers",b:"Tongs"},{a:"Nail",b:"Screw"},{a:"Bolt",b:"Nut"},{a:"Clamp",b:"Vise"},{a:"Sander",b:"Grinder"},{a:"Drill",b:"Jackhammer"},{a:"Crowbar",b:"Lever"},{a:"File",b:"Sandpaper"},{a:"Flashlight",b:"Lantern"},{a:"Soldering iron",b:"Glue gun"},{a:"Ratchet",b:"Socket"},{a:"Sledgehammer",b:"Pickaxe"},{a:"Rake",b:"Hoe"},{a:"Shovel",b:"Spade"},{a:"Trowel",b:"Scoop"},{a:"Sickle",b:"Scythe"},{a:"Chainsaw",b:"Lawnmower"},{a:"Wheelbarrow",b:"Cart"},{a:"Hose",b:"Sprinkler"},{a:"Broom",b:"Mop"},{a:"Vacuum",b:"Duster"},{a:"Bucket",b:"Basin"},{a:"Ruler",b:"Tape measure"},{a:"Compass",b:"Protractor"},{a:"Hourglass",b:"Sundial"},{a:"Thermometer",b:"Barometer"},{a:"Microscope",b:"Telescope"},{a:"Binoculars",b:"Magnifying glass"},{a:"Stopwatch",b:"Timer"},{a:"Calculator",b:"Abacus"},{a:"Clock",b:"Watch"},{a:"Funnel",b:"Pipette"},{a:"Pencil",b:"Pen"},{a:"Marker",b:"Highlighter"},{a:"Chalk",b:"Crayon"},{a:"Stapler",b:"Hole punch"},{a:"Glue",b:"Tape"},{a:"Eraser",b:"Sharpener"},{a:"Paintbrush",b:"Roller"},{a:"Whisk",b:"Spatula"},{a:"Ladle",b:"Spoon"},{a:"Grater",b:"Peeler"},{a:"Rolling pin",b:"Pestle"},{a:"Colander",b:"Sieve"},{a:"Corkscrew",b:"Bottle opener"},{a:"Can opener",b:"Jar opener"},{a:"Blender",b:"Mixer"},{a:"Kettle",b:"Teapot"}],
+  "Christmas": [{a:"Sleigh",b:"Sled"},{a:"Reindeer",b:"Elk"},{a:"Wreath",b:"Garland"},{a:"Ornament",b:"Bauble"},{a:"Mistletoe",b:"Holly"},{a:"Gingerbread",b:"Cookie"},{a:"Candle",b:"Lantern"},{a:"Nutcracker",b:"Toy soldier"},{a:"Eggnog",b:"Cider"},{a:"Fruitcake",b:"Pudding"},{a:"Tinsel",b:"Streamer"},{a:"Elf",b:"Dwarf"},{a:"Chimney",b:"Fireplace"},{a:"Bell",b:"Chime"},{a:"Candy cane",b:"Lollipop"},{a:"Snowball",b:"Snowflake"},{a:"Carol",b:"Hymn"},{a:"Poinsettia",b:"Ivy"},{a:"Icicle",b:"Frost"},{a:"Manger",b:"Stable"},{a:"Shepherd",b:"Wise man"},{a:"Turkey",b:"Ham"},{a:"Mittens",b:"Gloves"},{a:"Scarf",b:"Muffler"},{a:"Peppermint",b:"Spearmint"},{a:"Angel",b:"Star"},{a:"Grinch",b:"Scrooge"},{a:"Rudolph",b:"Frosty"},{a:"Pine",b:"Fir"},{a:"Ribbon",b:"Bow"},{a:"Sugarplum",b:"Gumdrop"},{a:"Yule log",b:"Firewood"},{a:"Advent",b:"Countdown"},{a:"Chestnut",b:"Walnut"},{a:"Cranberry",b:"Currant"},{a:"Ski",b:"Snowboard"},{a:"Toffee",b:"Fudge"},{a:"Marshmallow",b:"Meringue"},{a:"Sack",b:"Bag"},{a:"Stocking",b:"Sock"},{a:"Chocolate",b:"Caramel"},{a:"Feast",b:"Dinner"},{a:"Snowman",b:"Snow angel"},{a:"Blizzard",b:"Flurry"},{a:"Wrapping paper",b:"Tissue paper"},{a:"Snow globe",b:"Music box"},{a:"Present",b:"Parcel"},{a:"Cinnamon",b:"Nutmeg"},{a:"Robin",b:"Dove"},{a:"Partridge",b:"Turtledove"},{a:"Donkey",b:"Ox"},{a:"Snowplow",b:"Shovel"},{a:"Sleet",b:"Hail"},{a:"Comet",b:"Cupid"},{a:"Mince pie",b:"Tart"}],
+  "Holidays": [{a:"Christmas",b:"Hanukkah"},{a:"Halloween",b:"Thanksgiving"},{a:"Easter",b:"Passover"},{a:"Valentine's Day",b:"Mother's Day"},{a:"Father's Day",b:"Mother's Day"},{a:"Memorial Day",b:"Labor Day"},{a:"Fourth of July",b:"Memorial Day"},{a:"Diwali",b:"Holi"},{a:"New Year",b:"New Year's Eve"},{a:"Thanksgiving",b:"Christmas"},{a:"St. Patrick's Day",b:"Cinco de Mayo"},{a:"Ramadan",b:"Eid"},{a:"Kwanzaa",b:"Hanukkah"},{a:"Birthday",b:"Anniversary"},{a:"Easter",b:"Christmas"},{a:"Christmas Eve",b:"New Year's Eve"},{a:"Independence Day",b:"Bastille Day"},{a:"Groundhog Day",b:"Valentine's Day"},{a:"April Fools' Day",b:"Valentine's Day"},{a:"Columbus Day",b:"Thanksgiving"},{a:"Veterans Day",b:"Memorial Day"},{a:"Boxing Day",b:"Christmas"},{a:"Mardi Gras",b:"Carnival"},{a:"Chinese New Year",b:"Diwali"},{a:"Hanukkah",b:"Passover"},{a:"Palm Sunday",b:"Easter"},{a:"Good Friday",b:"Easter"},{a:"Halloween",b:"Day of the Dead"},{a:"Cinco de Mayo",b:"Day of the Dead"},{a:"Oktoberfest",b:"Carnival"},{a:"Mother's Day",b:"Grandparents Day"},{a:"Earth Day",b:"Arbor Day"},{a:"New Year",b:"Chinese New Year"},{a:"Advent",b:"Christmas"},{a:"Lent",b:"Easter"},{a:"Presidents Day",b:"Columbus Day"},{a:"Halloween",b:"April Fools' Day"},{a:"Thanksgiving",b:"Harvest Festival"},{a:"Christmas",b:"Kwanzaa"},{a:"Easter",b:"Mother's Day"},{a:"New Year's Eve",b:"Fourth of July"},{a:"Halloween",b:"Mardi Gras"},{a:"Veterans Day",b:"Labor Day"},{a:"Diwali",b:"Eid"},{a:"Passover",b:"Ramadan"},{a:"Rosh Hashanah",b:"Yom Kippur"},{a:"St. Patrick's Day",b:"Mardi Gras"},{a:"Thanksgiving",b:"New Year"},{a:"Christmas",b:"New Year"},{a:"Birthday",b:"Graduation"},{a:"Bastille Day",b:"Cinco de Mayo"},{a:"Hanukkah",b:"Diwali"},{a:"Labor Day",b:"Independence Day"},{a:"Valentine's Day",b:"Anniversary"},{a:"Fourth of July",b:"Bonfire Night"}],
+  "Objects": [{a:"fork",b:"spoon"},{a:"pen",b:"pencil"},{a:"broom",b:"mop"},{a:"bucket",b:"basket"},{a:"bottle",b:"jar"},{a:"plate",b:"bowl"},{a:"blanket",b:"quilt"},{a:"pillow",b:"cushion"},{a:"lamp",b:"lantern"},{a:"candle",b:"torch"},{a:"clock",b:"watch"},{a:"ladder",b:"staircase"},{a:"rope",b:"chain"},{a:"nail",b:"screw"},{a:"scissors",b:"shears"},{a:"needle",b:"pin"},{a:"button",b:"zipper"},{a:"hat",b:"cap"},{a:"scarf",b:"shawl"},{a:"glove",b:"mitten"},{a:"boot",b:"sandal"},{a:"umbrella",b:"parasol"},{a:"bag",b:"backpack"},{a:"wallet",b:"purse"},{a:"suitcase",b:"briefcase"},{a:"box",b:"crate"},{a:"book",b:"magazine"},{a:"map",b:"globe"},{a:"ruler",b:"tape measure"},{a:"phone",b:"tablet"},{a:"television",b:"monitor"},{a:"camera",b:"binoculars"},{a:"telescope",b:"microscope"},{a:"fan",b:"heater"},{a:"fridge",b:"freezer"},{a:"kettle",b:"teapot"},{a:"sink",b:"bathtub"},{a:"mirror",b:"window"},{a:"door",b:"gate"},{a:"key",b:"lock"},{a:"ring",b:"bracelet"},{a:"crown",b:"tiara"},{a:"whistle",b:"bell"},{a:"ball",b:"balloon"},{a:"kite",b:"frisbee"},{a:"dice",b:"domino"},{a:"boat",b:"ship"},{a:"canoe",b:"kayak"},{a:"bicycle",b:"motorcycle"},{a:"wagon",b:"cart"},{a:"vase",b:"pot"},{a:"towel",b:"napkin"},{a:"comb",b:"brush"},{a:"chalk",b:"crayon"},{a:"stapler",b:"clip"}]
+};
+const WDATA = [{left:"Cheap",right:"Expensive",main:"Hot Dog",imp:"Lobster"},{left:"Slow",right:"Fast",main:"Tractor",imp:"Race Car"},{left:"Cold",right:"Hot",main:"Iced Tea",imp:"Hot Coffee"},{left:"Quiet",right:"Loud",main:"Library",imp:"Nightclub"},{left:"Safe",right:"Dangerous",main:"Goldfish",imp:"Shark"},{left:"Small",right:"Huge",main:"Scooter",imp:"Cruise Ship"},{left:"Boring",right:"Exciting",main:"Stamp Collecting",imp:"Bungee Jumping"},{left:"Ugly",right:"Beautiful",main:"Toad",imp:"Butterfly"},{left:"Useless",right:"Essential",main:"Garlic Press",imp:"Refrigerator"},{left:"Soft",right:"Hard",main:"Pillow",imp:"Brick"},{left:"Light",right:"Heavy",main:"Feather",imp:"Anvil"},{left:"Common",right:"Rare",main:"Pigeon",imp:"Panda"},{left:"Easy",right:"Hard",main:"Tic-Tac-Toe",imp:"Chess"},{left:"Dull",right:"Sharp",main:"Spoon",imp:"Knife"},{left:"Smooth",right:"Rough",main:"Silk",imp:"Sandpaper"},{left:"Sweet",right:"Sour",main:"Honey",imp:"Lemon"},{left:"Young",right:"Old",main:"Baby",imp:"Grandpa"},{left:"Short",right:"Tall",main:"Cottage",imp:"Lighthouse"},{left:"Healthy",right:"Unhealthy",main:"Salad",imp:"Donut"},{left:"Mild",right:"Spicy",main:"Cucumber",imp:"Chili Pepper"},{left:"Lazy",right:"Energetic",main:"Sloth",imp:"Hummingbird"},{left:"Plain",right:"Fancy",main:"Flip-Flops",imp:"High Heels"},{left:"Modern",right:"Old-Fashioned",main:"Smartphone",imp:"Rotary Phone"},{left:"Sad",right:"Happy",main:"Funeral",imp:"Birthday Party"},{left:"Fragile",right:"Sturdy",main:"Glass",imp:"Steel"},{left:"Scary",right:"Funny",main:"Horror",imp:"Comedy"},{left:"Bland",right:"Flavorful",main:"Rice Cake",imp:"Curry"},{left:"Peaceful",right:"Violent",main:"Yoga",imp:"Boxing"},{left:"Relaxing",right:"Stressful",main:"Meditation",imp:"Public Speaking"},{left:"Cozy",right:"Scary",main:"Cabin",imp:"Haunted House"},{left:"Bitter",right:"Sweet",main:"Dark Chocolate",imp:"Cotton Candy"},{left:"Shallow",right:"Deep",main:"Puddle",imp:"Ocean"},{left:"Thin",right:"Thick",main:"Comic Book",imp:"Dictionary"},{left:"Low-Paid",right:"Well-Paid",main:"Cashier",imp:"Surgeon"},{left:"Dim",right:"Bright",main:"Nightlight",imp:"Stadium Lights"},{left:"Weak",right:"Powerful",main:"Squirt Gun",imp:"Cannon"},{left:"Sunny",right:"Stormy",main:"Clear Sky",imp:"Hurricane"},{left:"Soothing",right:"Energetic",main:"Lullaby",imp:"Rock Song"},{left:"Ancient",right:"Modern",main:"Pyramids",imp:"Skyscraper"},{left:"Dry",right:"Wet",main:"Desert",imp:"Rainforest"},{left:"Tame",right:"Wild",main:"Poodle",imp:"Wolf"},{left:"Gentle",right:"Fierce",main:"Deer",imp:"Tiger"},{left:"Warm",right:"Freezing",main:"Beach",imp:"Antarctica"},{left:"Simple",right:"Complex",main:"Paper Airplane",imp:"Space Shuttle"},{left:"Empty",right:"Crowded",main:"Countryside",imp:"Times Square"},{left:"Plain",right:"Colorful",main:"Sparrow",imp:"Peacock"},{left:"Tiny",right:"Giant",main:"Ant",imp:"Whale"}];
 const QDATA = {
   "Daily Life & Social": [{q:"What's your go-to comfort food after a long day?",imp:"What's a food you could eat every single day?"},{q:"How many alarms do you set in the morning?",imp:"How many times do you hit snooze before getting up?"},{q:"What's the first thing you do when you wake up?",imp:"What's the last thing you do before falling asleep?"},{q:"What time do you usually eat dinner?",imp:"What time do you usually go to bed?"},{q:"How many times a week do you cook at home?",imp:"How many times a week do you eat out?"},{q:"What's your favorite room in your home?",imp:"Where in your home do you relax the most?"},{q:"What's a small habit you're proud of?",imp:"What's a habit you'd like to break?"},{q:"How long is your daily commute in minutes?",imp:"How many minutes do you spend getting ready in the morning?"},{q:"What's your go-to karaoke song?",imp:"What song is stuck in your head right now?"},{q:"What color is your toothbrush?",imp:"What color is your phone case?"},{q:"What's your favorite ice cream flavor?",imp:"What's your favorite milkshake flavor?"},{q:"How many pairs of shoes do you own?",imp:"How many jackets or coats do you own?"},{q:"What's your favorite way to get around town?",imp:"How do you usually get to work or school?"},{q:"What day of the week do you do your grocery shopping?",imp:"What day do you usually do laundry?"},{q:"What's your favorite board or card game?",imp:"What's a game you played a lot as a kid?"},{q:"What's your favorite topping on pizza?",imp:"What's your favorite topping on a burger?"},{q:"What time do you usually wake up on weekends?",imp:"What time do you usually wake up on weekdays?"},{q:"What's your favorite dessert?",imp:"What dessert would you order at a birthday dinner?"},{q:"How many pillows do you sleep with?",imp:"How many blankets are on your bed?"},{q:"What's your favorite way to unwind after work?",imp:"What do you do to calm down when you're stressed?"},{q:"What's the last thing you bought online?",imp:"What's something you buy way too often?"},{q:"What's your favorite fruit?",imp:"What fruit do you put in a smoothie?"},{q:"What's your dream vacation destination?",imp:"Where would you go for a weekend getaway?"},{q:"What's your go-to order at a coffee shop in summer?",imp:"What warm drink do you order in winter?"},{q:"How many text messages do you send in a day?",imp:"How many photos do you take in a day?"},{q:"What's your favorite smell around the house?",imp:"What scent of candle do you like most?"},{q:"What's your favorite kind of weather?",imp:"What's your least favorite kind of weather?"},{q:"What's your favorite thing to eat for lunch?",imp:"What do you usually pack for a picnic?"},{q:"What's your favorite social media platform?",imp:"What app do you open when you're bored?"},{q:"How many hours do you spend watching TV on a weekend?",imp:"How many hours do you spend gaming on a weekend?"},{q:"What's your favorite thing to drink in the morning?",imp:"What do you drink with your dinner?"},{q:"What's your favorite kind of cookie?",imp:"What's your favorite kind of cake?"},{q:"What's a chore you actually find relaxing?",imp:"What's a chore you'd happily pay someone else to do?"},{q:"What's your favorite thing to do on a rainy day?",imp:"What do you like to do on a snow day?"},{q:"How many close friends do you keep in regular contact with?",imp:"How many group chats are you active in?"},{q:"What's your go-to breakfast on a busy morning?",imp:"What's your favorite lazy weekend breakfast?"},{q:"How old were you when you got your first phone?",imp:"How old were you when you learned to ride a bike?"},{q:"What's the last app you opened on your phone?",imp:"What app do you use the most?"},{q:"What do you eat when you're feeling sick?",imp:"What food do you crave on a rainy day?"},{q:"What's your favorite season?",imp:"What season were you born in?"},{q:"What's your favorite holiday?",imp:"What holiday do you find overrated?"},{q:"How many browser tabs do you have open?",imp:"How many notifications are on your phone right now?"},{q:"What's your favorite thing to cook?",imp:"What's the one dish you've truly mastered?"},{q:"How many cups of coffee do you drink a day?",imp:"How many cups of tea do you drink a day?"},{q:"What's your favorite fast food spot?",imp:"Where do you go to celebrate something?"},{q:"What emoji do you use the most?",imp:"What emoji matches your mood today?"},{q:"What's your phone ringtone?",imp:"What song do you use as your alarm?"},{q:"What's your favorite cuisine?",imp:"What cuisine do you order for takeout?"},{q:"What's your favorite weekend activity?",imp:"What do you do on a lazy Sunday?"},{q:"What pet would you love to have?",imp:"What pet did you have growing up?"},{q:"What snack do you get at the movies?",imp:"What snack do you keep in your bag?"},{q:"What show are you watching right now?",imp:"What show could you rewatch forever?"},{q:"What was your favorite subject in school?",imp:"What subject were you best at?"},{q:"What's your favorite month?",imp:"What month is your birthday?"},{q:"How many siblings do you have?",imp:"How many people live in your home?"},{q:"What's your favorite kind of sandwich?",imp:"What do you order at a deli?"},{q:"What do you order at a bar?",imp:"What cocktail would you order to look fancy?"},{q:"What's the wallpaper on your phone?",imp:"What's your computer's desktop background?"},{q:"What's your favorite kind of music?",imp:"What genre do you play while working?"},{q:"What do you look forward to on Fridays?",imp:"What's the best part of your weekend?"},{q:"What language would you love to learn?",imp:"What language did you study in school?"},{q:"What's your favorite condiment?",imp:"What sauce do you put on everything?"},{q:"How many keys are on your keychain?",imp:"How many cards are in your wallet?"},{q:"What's your favorite breakfast cereal?",imp:"What cereal did you eat as a kid?"},{q:"What's your favorite way to exercise?",imp:"What workout do you always avoid?"},{q:"What's your favorite piece of clothing?",imp:"What's the comfiest thing you own?"},{q:"What do you put on your toast?",imp:"What do you spread on a bagel?"},{q:"What sport do you like to watch?",imp:"What sport did you play as a kid?"},{q:"What year did you start your current job?",imp:"What year did you move into your current home?"}],
   "Love & Relationships": [{q:"What's a classic romantic gesture?",imp:"What's a kind thing to do for a friend?"},{q:"What's a romantic dinner dish?",imp:"What's a dish you'd cook to impress guests?"},{q:"At what age did you have your first kiss?",imp:"At what age did you get your first phone?"},{q:"What flower says 'I love you'?",imp:"What flower belongs in a bouquet?"},{q:"What's a cute pet name for a partner?",imp:"What's a cute nickname for a friend?"},{q:"How many kids would you want?",imp:"How many pets would you love to have?"},{q:"What's a red flag on a first date?",imp:"What's a red flag in a job interview?"},{q:"What's a great anniversary gift?",imp:"What's a great birthday gift?"},{q:"What song would be your first wedding dance?",imp:"What song is on your feel-good playlist?"},{q:"What's the best month to get married?",imp:"What's the best month for a vacation?"},{q:"Who's your ultimate celebrity crush?",imp:"What celebrity would you love to meet?"},{q:"What's the best rom-com of all time?",imp:"What's a great movie for a cozy night in?"},{q:"What's an ick that turns you off instantly?",imp:"What's a habit that annoys you in public?"},{q:"How many people have you dated?",imp:"How many close friends do you have?"},{q:"How many hours would your ideal first date last?",imp:"How many hours is a perfect night out?"},{q:"What's a sweet good-morning text to send?",imp:"What's a nice thing to text a friend?"},{q:"What's your love language?",imp:"How do you show friends you care?"},{q:"What's an unforgettable date idea?",imp:"What's a fun weekend activity?"},{q:"At what age is it ideal to settle down?",imp:"At what age should you start a career?"},{q:"What's a dealbreaker in a relationship?",imp:"What's a dealbreaker in a roommate?"},{q:"What's the best cuisine for a first date?",imp:"What's your favorite type of cuisine?"},{q:"What TV couple is relationship goals?",imp:"What TV duo has the best friendship?"},{q:"What's a must-have quality in a soulmate?",imp:"What's a must-have quality in a boss?"},{q:"What's a cute couples' Halloween costume?",imp:"What's a fun costume for a party?"},{q:"How many dates before you're official?",imp:"How many hangouts before someone's a real friend?"},{q:"What's the most romantic city?",imp:"What city would you love to live in?"},{q:"What's the best pickup line?",imp:"What's a funny way to break the ice?"},{q:"What season is best for falling in love?",imp:"What's your favorite season?"},{q:"What's an instant green flag on a date?",imp:"What's a sign of a trustworthy coworker?"},{q:"What drink would you order on a date?",imp:"What's your go-to drink at a bar?"},{q:"What's a cozy at-home date idea?",imp:"What's a relaxing way to spend an evening?"},{q:"What year would you relive with your partner?",imp:"What year was the best of your life?"},{q:"What emoji best describes love?",imp:"What emoji do you use the most?"},{q:"What's a great couples' hobby?",imp:"What's a hobby you'd love to try?"},{q:"What's a romantic breakfast in bed?",imp:"What's your favorite breakfast food?"},{q:"How many weddings have you attended?",imp:"How many concerts have you been to?"},{q:"What's a perfect proposal setting?",imp:"What's a dream party venue?"},{q:"What's the ideal age gap in a couple?",imp:"What's a common age gap between siblings?"},{q:"What personality trait makes someone attractive?",imp:"What trait do you admire in a leader?"},{q:"What's the best way to meet a partner?",imp:"What's the best way to make new friends?"},{q:"What's a memorable wedding theme?",imp:"What's a fun party theme?"},{q:"How long should an engagement last?",imp:"How long should you date before moving in?"},{q:"What's the perfect Valentine's Day date?",imp:"What's a great way to celebrate a birthday?"},{q:"What show would a couple binge together?",imp:"What's a show worth binge-watching?"},{q:"What's the best day of the week for a date?",imp:"What's the best day for a night out?"},{q:"On a scale of 1-10, how romantic are you?",imp:"On a scale of 1-10, how adventurous are you?"},{q:"What's the first thing you notice on a date?",imp:"What's the first thing you notice about a stranger?"},{q:"What year did you have your first relationship?",imp:"What year did you graduate high school?"},{q:"How many anniversaries have you celebrated?",imp:"How many road trips have you taken?"},{q:"At what age is it ideal to have your first child?",imp:"At what age should you buy your first home?"},{q:"How many exes are you still friends with?",imp:"How many coworkers do you hang out with?"},{q:"Name a famous fictional couple.",imp:"Name a famous duo."},{q:"Which celebrity would be your dream date?",imp:"Which celebrity would you want as a best friend?"},{q:"Name a classic love song.",imp:"Name a great road-trip song."},{q:"Which fictional character is your ideal partner?",imp:"Which fictional character would you want as a sibling?"},{q:"What's the key to a lasting relationship?",imp:"What's the key to a strong friendship?"},{q:"What dessert would you share on a date?",imp:"What dessert would you order on a night out?"},{q:"What's the perfect Valentine's chocolate?",imp:"What's the perfect stocking-stuffer candy?"},{q:"What scent is attractive on a partner?",imp:"What scent reminds you of home?"},{q:"Where's a great spot for a first date?",imp:"Where's a great spot to meet new people?"},{q:"What's the best double-date activity?",imp:"What's the best group hangout?"},{q:"Where's the dreamiest honeymoon destination?",imp:"Where would you love to retire?"},{q:"What's the most attractive eye color?",imp:"What eye color is most common in your family?"},{q:"What's a good way to apologize to your partner?",imp:"What's a good way to cheer someone up?"},{q:"What's a classic date-night movie genre?",imp:"What's your go-to movie genre?"},{q:"What's a fun anniversary tradition?",imp:"What's a fun holiday tradition?"},{q:"What word describes true love?",imp:"What word describes pure happiness?"},{q:"What color represents love?",imp:"What color represents luck?"}],
@@ -796,6 +998,7 @@ const ICONS={
   ghost:'<path d="M5 21V11a7 7 0 0 1 14 0v10l-2.5-2-2.5 2-2-2-2 2-2.5-2z"/><circle cx="9.5" cy="10.5" r="1"/><circle cx="14.5" cy="10.5" r="1"/>',
   cap:'<path d="M22 9 12 5 2 9l10 4z"/><path d="M6 10.5V15c0 1.4 2.7 3 6 3s6-1.6 6-3v-4.5"/><path d="M22 9v5"/>',
   lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  slider:'<line x1="3" y1="8" x2="21" y2="8"/><circle cx="15" cy="8" r="2.6"/><line x1="3" y1="16" x2="21" y2="16"/><circle cx="9" cy="16" r="2.6"/>',
   heart:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/>',
   money:'<line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
   chip:'<rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/>',
@@ -826,9 +1029,12 @@ const S = {
   showHintToImposter:true,
   impostersKnowEachOther:false,
   customWords:[],         // {w, h}
-  mode:'word',            // 'word' | 'questions'
+  mode:'word',            // 'word' | 'questions' | 'undercover' | 'wavelength'
   qCategories:{},         // name -> true (questions mode)
   customQuestions:[],     // {q, imp}
+  uCategories:{},         // name -> true (undercover mode)
+  customUndercover:[],    // {a, b}
+  customWavelength:[],    // {left, right, main, imp}
   round:null
 };
 
@@ -838,6 +1044,7 @@ function save(){ try{ localStorage.setItem('imposter', JSON.stringify({
   showCategoryToImposter:S.showCategoryToImposter,showHintToImposter:S.showHintToImposter,
   impostersKnowEachOther:S.impostersKnowEachOther,customWords:S.customWords,
   mode:S.mode,qCategories:S.qCategories,customQuestions:S.customQuestions,
+  uCategories:S.uCategories,customUndercover:S.customUndercover,customWavelength:S.customWavelength,
   theme:document.documentElement.getAttribute('data-theme')
 }));}catch(e){} }
 function load(){
@@ -848,8 +1055,9 @@ function load(){
       randomImposters:!!d.randomImposters,imposterNeverFirst:!!d.imposterNeverFirst,
       categories:d.categories||{},showCategoryToImposter:d.showCategoryToImposter!==false,
       showHintToImposter:d.showHintToImposter!==false,impostersKnowEachOther:!!d.impostersKnowEachOther,
-      customWords:d.customWords||[],mode:(d.mode==='questions'?'questions':'word'),
-      qCategories:d.qCategories||{},customQuestions:d.customQuestions||[]
+      customWords:d.customWords||[],mode:(['questions','undercover','wavelength'].includes(d.mode)?d.mode:'word'),
+      qCategories:d.qCategories||{},customQuestions:d.customQuestions||[],
+      uCategories:d.uCategories||{},customUndercover:d.customUndercover||[],customWavelength:d.customWavelength||[]
     });
     if(d.theme) document.documentElement.setAttribute('data-theme',d.theme);
     }
@@ -872,13 +1080,21 @@ function go(id){
   if(id==='qcustom') renderQCustom();
   if(id==='qdiscuss') renderQDiscuss();
   if(id==='qresults') renderQResults();
+  if(id==='usetup') renderUSetup();
+  if(id==='ucats') renderUCats();
+  if(id==='ucustom') renderUCustom();
+  if(id==='uresults') renderUResults();
+  if(id==='wsetup') renderWSetup();
+  if(id==='wcustom') renderWCustom();
+  if(id==='wdiscuss') renderWDiscuss();
+  if(id==='wresults') renderWResults();
   save();
 }
 
 /* ================= THEME ================= */
 function applyThemeBtns(){
   const dark=document.documentElement.getAttribute('data-theme')==='dark';
-  document.querySelectorAll('#themeBtn,#themeBtn2,#themeBtn3').forEach(b=>b.innerHTML=icon(dark?'sun':'moon',20));
+  document.querySelectorAll('#themeBtn,#themeBtn2,#themeBtn3,#themeBtn4,#themeBtn5').forEach(b=>b.innerHTML=icon(dark?'sun':'moon',20));
 }
 function toggleTheme(){
   const cur=document.documentElement.getAttribute('data-theme');
@@ -1149,28 +1365,40 @@ function newRound(){
   if(!cats.length){ go('setup'); return; }
   buildRound(cats); go('pass');
 }
-function confirmQuit(){ go(S.mode==='questions'?'qsetup':'setup'); }
+function confirmQuit(){ go(setupScreen()); }
 
 /* ================= MODE / NAV HELPERS ================= */
+function setupScreen(){ return {word:'setup',questions:'qsetup',undercover:'usetup',wavelength:'wsetup'}[S.mode]||'setup'; }
 function setMode(m){
   S.mode=m;
   document.querySelectorAll('#modeSeg .modeseg-btn').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
-  const t=document.getElementById('tagline'); if(t) t.textContent = m==='questions' ? 'One question. One faker. Find them.' : 'One word. One faker. Find them.';
+  const tags={
+    word:'Everyone gets the same word, except the imposter. Find out who they are.',
+    questions:'Everyone gets the same question, except the imposter. Find out who they are.',
+    undercover:'Everyone gets a word — the imposter gets a look-alike. Find out who they are.',
+    wavelength:'Everyone rates the same thing, except the imposter. Find out who they are.'};
+  const t=document.getElementById('tagline'); if(t) t.textContent=tags[m]||tags.word;
   save();
 }
-function startRound(){ go(S.mode==='questions'?'qsetup':'setup'); }
+function startRound(){ go(setupScreen()); }
 function openRules(){
-  const q = S.mode==='questions';
-  document.getElementById('rulesWord').style.display=q?'none':'';
-  document.getElementById('rulesQ').style.display=q?'':'none';
+  const m=S.mode;
+  document.getElementById('rulesWord').style.display=m==='word'?'':'none';
+  document.getElementById('rulesQ').style.display=m==='questions'?'':'none';
+  document.getElementById('rulesU').style.display=m==='undercover'?'':'none';
+  document.getElementById('rulesW').style.display=m==='wavelength'?'':'none';
   go('rules');
 }
-function backToSetup(){ go(S.mode==='questions'?'qsetup':'setup'); }
+function backToSetup(){ go(setupScreen()); }
 function openReveal(i){
   if(S.round.seen[i]){ flash('Already revealed — pass the phone'); return; }
-  if(S.round.q) openQRole(i); else openRole(i);
+  if(S.round.q) openQRole(i);
+  else if(S.round.u) openURole(i);
+  else if(S.round.w) openWRole(i);
+  else openRole(i);
 }
-function afterReveal(){ go(S.round && S.round.q ? 'qdiscuss' : 'play'); }
+function afterReveal(){ const r=S.round; go(r&&r.q?'qdiscuss': r&&r.w?'wdiscuss':'play'); }
+function revealResults(){ go(S.round&&S.round.u?'uresults':'results'); }
 
 /* ================= QUESTIONS: SETUP / CATEGORIES / CUSTOM ================= */
 function renderQSetup(){
@@ -1282,24 +1510,17 @@ function doQReveal(){
   const i=curPlayer, r=S.round, isImp=r.imposters.has(i);
   const box=document.getElementById('qsecretbox');
   const fx='<span class="shine"></span><span class="ring"></span>';
+  // Imposters do NOT know they're the imposter: the screen is IDENTICAL to a crew
+  // member's — the only difference is which question text they secretly receive.
   const q = isImp ? r.impQ : r.mainQ;
-  box.className='secretbox revealed'+(isImp?' imp':'');
-  box.innerHTML=fx+'<div>'
-    +(isImp?'<div class="role-tag tag-imp">Imposter</div>':'<div class="role-tag tag-crew">Your question</div>')
+  box.className='secretbox revealed';
+  box.innerHTML=fx+'<div><div class="role-tag tag-crew">Your question</div>'
     +'<div class="qtext" style="margin-top:12px;">'+escapeHtml(q)+'</div></div>';
-  const catEl=document.getElementById('qroleCat');
-  if(!isImp){ catEl.textContent='Category: '+r.category; catEl.style.display=''; }
-  else if(!S.showCategoryToImposter){ catEl.style.display='none'; }
-  let ex='';
-  if(isImp && S.impostersKnowEachOther && r.numImp>1){
-    const mates=[...r.imposters].filter(j=>j!==i).map(j=>S.players[j]);
-    ex+='<div class="coimp"><span class="i">'+icon('users',15)+'</span>Fellow imposter'+(mates.length>1?'s':'')+': <b>'+mates.map(escapeHtml).join(', ')+'</b></div>';
-  }
-  if(isImp) ex+='<div class="coimp">Answer your question naturally — blend in.</div>';
-  document.getElementById('qroleExtra').innerHTML=ex;
+  // category was already shown/hidden uniformly on the covered screen (per showCategoryToImposter) — leave it as-is
+  document.getElementById('qroleExtra').innerHTML='';
   document.getElementById('qanswerWrap').style.display='';
   document.getElementById('qroleBack').style.visibility='hidden'; // must answer once revealed
-  const inp=document.getElementById('qanswerInput'); inp.focus();
+  document.getElementById('qanswerInput').focus();
 }
 function submitQAnswer(){
   const v=document.getElementById('qanswerInput').value.trim();
@@ -1348,6 +1569,246 @@ function newQRound(){
   buildQRound(cats); go('pass');
 }
 
+/* ================= UNDERCOVER ================= */
+let curURevealed=false, curWRevealed=false;
+function renderUSetup(){
+  syncSwitches();
+  document.getElementById('uSumPlayers').textContent=S.players.length+(S.players.length===1?' player':' players');
+  document.getElementById('uSumImp').textContent=S.randomImposters?'Random (1–3)':(S.numImposters+(S.numImposters===1?' imposter':' imposters'));
+  const sel=selectedUCategoryNames();
+  document.getElementById('uSumCats').textContent=sel.length?sel.length+' selected':'Select categories to play with';
+  const cw=S.customUndercover.length;
+  document.getElementById('uSumCustom').textContent=cw?cw+(cw===1?' pair added':' pairs added'):'Add your own word pairs (optional)';
+  document.getElementById('usetupErr').textContent='';
+}
+function selectedUCategoryNames(){
+  return Object.keys(S.uCategories).filter(c=>S.uCategories[c] && poolUFor(c).length);
+}
+function renderUCats(){
+  const wrap=document.getElementById('ucatList'); wrap.innerHTML='';
+  const list=CATEGORY_META.filter(([n])=>n!=='Custom Words' && UDATA[n] && UDATA[n].length);
+  if(S.customUndercover.length) list.push(['Custom Pairs','pencil']);
+  list.forEach(([name,ic])=>{
+    const on=!!S.uCategories[name];
+    const card=document.createElement('button');
+    card.className='catcard'+(on?' on':'');
+    card.innerHTML=`<span class="cbadge">${icon('check',14)}</span><span class="cicon">${icon(ic,27)}</span><span class="cname">${escapeHtml(name)}</span>`;
+    card.onclick=()=>{S.uCategories[name]=!S.uCategories[name];renderUCats();save();};
+    wrap.appendChild(card);
+  });
+  const cnt=selectedUCategoryNames().length;
+  document.getElementById('uccount').textContent=cnt;
+  document.getElementById('uccount2').textContent=cnt;
+}
+function allUCats(v){
+  CATEGORY_META.forEach(([n])=>{ if(n!=='Custom Words') S.uCategories[n]=v; });
+  if(S.customUndercover.length) S.uCategories['Custom Pairs']=v;
+  renderUCats(); save();
+}
+function renderUCustom(){
+  const wrap=document.getElementById('ucwlist'); wrap.innerHTML='';
+  S.customUndercover.forEach((cp,i)=>{
+    const row=document.createElement('div'); row.className='prow';
+    row.innerHTML=`<span class="num">${i+1}</span><input value="${escapeAttr(cp.a)} / ${escapeAttr(cp.b)}" readonly style="color:var(--text)"/><button class="del">✕</button>`;
+    row.querySelector('.del').onclick=()=>{S.customUndercover.splice(i,1); if(!S.customUndercover.length) S.uCategories['Custom Pairs']=false; renderUCustom(); save();};
+    wrap.appendChild(row);
+  });
+  document.getElementById('ucwcount').textContent=S.customUndercover.length;
+}
+function addUCustom(){
+  const a=document.getElementById('ucwA').value.trim(), b=document.getElementById('ucwB').value.trim();
+  if(!a||!b){ flash('Fill in both words'); return; }
+  S.customUndercover.push({a:a,b:b}); S.uCategories['Custom Pairs']=true;
+  document.getElementById('ucwA').value=''; document.getElementById('ucwB').value='';
+  document.getElementById('ucwA').focus(); renderUCustom(); save();
+}
+function poolUFor(cat){
+  if(cat==='Custom Pairs') return S.customUndercover.map(c=>({a:c.a,b:c.b}));
+  return UDATA[cat]||[];
+}
+function startUGame(){
+  const err=document.getElementById('usetupErr');
+  if(S.players.length<3){err.textContent='Add at least 3 players.';return;}
+  const cats=selectedUCategoryNames().filter(c=>poolUFor(c).length);
+  if(!cats.length){err.textContent='Pick at least one category (with words).';return;}
+  buildURound(cats); go('pass');
+}
+function buildURound(cats){
+  const n=S.players.length;
+  const capMax=Math.max(1,Math.min(3,n-2));
+  let numImp=S.randomImposters ? 1+Math.floor(Math.random()*capMax) : Math.min(S.numImposters,capMax);
+  const cat=cats[Math.floor(Math.random()*cats.length)];
+  const pool=poolUFor(cat);
+  const pair=pool[Math.floor(Math.random()*pool.length)];
+  const swap=Math.random()<0.5;
+  const crewWord = swap ? pair.b : pair.a;
+  const impWord = swap ? pair.a : pair.b;
+  const idx=[...Array(n).keys()]; shuffle(idx);
+  const imposters=new Set(idx.slice(0,numImp));
+  const start=Math.floor(Math.random()*n);
+  S.round={ u:true, category:cat, crewWord, impWord, imposters, numImp, start, seen:new Array(n).fill(false) };
+  renderPass();
+}
+function openURole(i){
+  curPlayer=i; curURevealed=false;
+  const r=S.round;
+  document.getElementById('uroleName').textContent='The word for '+S.players[i];
+  document.getElementById('uroleCat').textContent='Category: '+r.category;
+  document.getElementById('uroleCat').style.display='';
+  const box=document.getElementById('usecretbox');
+  box.className='secretbox';
+  box.innerHTML='<div class="tap">'+icon('eye',18)+' Tap to reveal your word</div>';
+  document.getElementById('uroleExtra').innerHTML='';
+  document.getElementById('uroleDone').style.visibility='hidden';
+  go('urole');
+}
+function doUReveal(){
+  if(curURevealed) return;
+  curURevealed=true;
+  const i=curPlayer, r=S.round, isImp=r.imposters.has(i);
+  S.round.seen[i]=true;   // lock on reveal
+  const box=document.getElementById('usecretbox');
+  const fx='<span class="shine"></span><span class="ring"></span>';
+  const word = isImp ? r.impWord : r.crewWord;   // imposter doesn't know theirs differs
+  box.className='secretbox revealed';
+  box.innerHTML=fx+'<div><div class="role-tag tag-crew">Your word</div>'
+    +'<div class="role-word" style="margin-top:12px;font-size:'+fitSize(word,42,22)+'px;">'+lettersHTML(word)+'</div></div>';
+  document.getElementById('uroleDone').style.visibility='visible';
+}
+function finishUReveal(){ go('pass'); renderPass(); }
+function renderUResults(){
+  const r=S.round;
+  const impWrap=document.getElementById('uImpReveal'); impWrap.innerHTML='';
+  [...r.imposters].forEach(i=>{
+    const c=document.createElement('div'); c.className='imp-card';
+    c.innerHTML=`<div class="ia">${icon('mask',24)}</div><b>${escapeHtml(S.players[i])}</b><span class="role">Imposter</span>`;
+    impWrap.appendChild(c);
+  });
+  document.getElementById('uResCrew').textContent=r.crewWord;
+  document.getElementById('uResImp').textContent=r.impWord;
+  document.getElementById('uResCat').textContent='Category: '+r.category;
+}
+function newURound(){
+  const cats=selectedUCategoryNames().filter(c=>poolUFor(c).length);
+  if(!cats.length){ go('usetup'); return; }
+  buildURound(cats); go('pass');
+}
+
+/* ================= WAVELENGTH ================= */
+function renderWSetup(){
+  syncSwitches();
+  document.getElementById('wSumPlayers').textContent=S.players.length+(S.players.length===1?' player':' players');
+  document.getElementById('wSumImp').textContent=S.randomImposters?'Random (1–3)':(S.numImposters+(S.numImposters===1?' imposter':' imposters'));
+  const cw=S.customWavelength.length;
+  document.getElementById('wSumCustom').textContent=cw?cw+(cw===1?' scale added':' scales added'):'Add your own scenarios (optional)';
+  document.getElementById('wsetupErr').textContent='';
+}
+function renderWCustom(){
+  const wrap=document.getElementById('wcwlist'); wrap.innerHTML='';
+  S.customWavelength.forEach((s,i)=>{
+    const row=document.createElement('div'); row.className='prow';
+    row.innerHTML=`<span class="num">${i+1}</span><input value="${escapeAttr(s.left)}↔${escapeAttr(s.right)}: ${escapeAttr(s.main)} / ${escapeAttr(s.imp)}" readonly style="color:var(--text)"/><button class="del">✕</button>`;
+    row.querySelector('.del').onclick=()=>{S.customWavelength.splice(i,1); renderWCustom(); save();};
+    wrap.appendChild(row);
+  });
+  document.getElementById('wcwcount').textContent=S.customWavelength.length;
+}
+function addWCustom(){
+  const left=document.getElementById('wcwLeft').value.trim(), right=document.getElementById('wcwRight').value.trim();
+  const main=document.getElementById('wcwMain').value.trim(), imp=document.getElementById('wcwImp').value.trim();
+  if(!left||!right||!main||!imp){ flash('Fill in all four fields'); return; }
+  S.customWavelength.push({left,right,main,imp});
+  ['wcwLeft','wcwRight','wcwMain','wcwImp'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('wcwLeft').focus(); renderWCustom(); save();
+}
+function poolW(){ return WDATA.concat(S.customWavelength); }
+function startWGame(){
+  const err=document.getElementById('wsetupErr');
+  if(S.players.length<3){err.textContent='Add at least 3 players.';return;}
+  if(!poolW().length){err.textContent='No scenarios available. Add a custom scale.';return;}
+  buildWRound(); go('pass');
+}
+function buildWRound(){
+  const n=S.players.length;
+  const capMax=Math.max(1,Math.min(3,n-2));
+  let numImp=S.randomImposters ? 1+Math.floor(Math.random()*capMax) : Math.min(S.numImposters,capMax);
+  const pool=poolW();
+  const s=pool[Math.floor(Math.random()*pool.length)];
+  const idx=[...Array(n).keys()]; shuffle(idx);
+  const imposters=new Set(idx.slice(0,numImp));
+  S.round={ w:true, left:s.left, right:s.right, main:s.main, imp:s.imp, imposters, numImp,
+    seen:new Array(n).fill(false), positions:new Array(n).fill(null) };
+  renderPass();
+}
+function openWRole(i){
+  curPlayer=i; curWRevealed=false;
+  const r=S.round;
+  document.getElementById('wroleName').textContent='The item for '+S.players[i];
+  const box=document.getElementById('wsecretbox');
+  box.className='secretbox';
+  box.innerHTML='<div class="tap">'+icon('eye',18)+' Tap to reveal your item</div>';
+  document.getElementById('wsliderWrap').style.display='none';
+  document.getElementById('wroleBack').style.visibility='visible';
+  go('wrole');
+}
+function doWReveal(){
+  if(curWRevealed) return;
+  curWRevealed=true;
+  const i=curPlayer, r=S.round, isImp=r.imposters.has(i);
+  const item = isImp ? r.imp : r.main;   // imposter doesn't know theirs differs
+  const box=document.getElementById('wsecretbox');
+  const fx='<span class="shine"></span><span class="ring"></span>';
+  box.className='secretbox revealed';
+  box.innerHTML=fx+'<div><div class="role-tag tag-crew">Rate this</div>'
+    +'<div class="role-word" style="margin-top:12px;font-size:'+fitSize(item,40,20)+'px;">'+lettersHTML(item)+'</div></div>';
+  document.getElementById('wLeftLbl').textContent=r.left;
+  document.getElementById('wRightLbl').textContent=r.right;
+  const sl=document.getElementById('wSlider'); sl.value=(r.positions[i]!=null?r.positions[i]:50);
+  document.getElementById('wsliderWrap').style.display='';
+  document.getElementById('wroleBack').style.visibility='hidden';
+}
+function submitWPosition(){
+  S.round.positions[curPlayer]=+document.getElementById('wSlider').value;
+  S.round.seen[curPlayer]=true;
+  go('pass'); renderPass();
+}
+function renderSpectrum(el, r, showImp){
+  el.innerHTML='';
+  const ends=document.createElement('div'); ends.className='spec-ends2';
+  ends.innerHTML='<span>'+escapeHtml(r.left)+'</span><span>'+escapeHtml(r.right)+'</span>';
+  const line=document.createElement('div'); line.className='spec-line';
+  S.players.forEach((n,i)=>{
+    const pos=r.positions[i]; if(pos==null) return;
+    const dot=document.createElement('div'); dot.className='spec-dot'+(showImp&&r.imposters.has(i)?' imp':'');
+    dot.style.left=Math.max(3,Math.min(97,pos))+'%';
+    dot.style.top=(6+(i%3)*30)+'px';
+    dot.innerHTML='<span class="sd" title="'+escapeAttr(n)+'">'+initial(n)+'</span>';
+    line.appendChild(dot);
+  });
+  el.appendChild(ends); el.appendChild(line);
+}
+function renderWDiscuss(){
+  const r=S.round;
+  document.getElementById('wDiscussItem').textContent=r.main;
+  renderSpectrum(document.getElementById('wSpectrumView'), r, false);
+}
+function renderWResults(){
+  const r=S.round;
+  const impWrap=document.getElementById('wImpReveal'); impWrap.innerHTML='';
+  [...r.imposters].forEach(i=>{
+    const c=document.createElement('div'); c.className='imp-card';
+    c.innerHTML=`<div class="ia">${icon('mask',24)}</div><b>${escapeHtml(S.players[i])}</b><span class="role">Imposter</span>`;
+    impWrap.appendChild(c);
+  });
+  document.getElementById('wResMain').textContent=r.main;
+  document.getElementById('wResImp').textContent=r.imp;
+  renderSpectrum(document.getElementById('wResSpectrum'), r, true);
+}
+function newWRound(){
+  if(!poolW().length){ go('wsetup'); return; }
+  buildWRound(); go('pass');
+}
+
 /* hook play/results rendering into nav */
 const _go=go;
 go=function(id){ _go(id); if(id==='play') renderPlay(); if(id==='results') renderResults(); };
@@ -1375,15 +1836,18 @@ function init(){
   if(Object.keys(S.qCategories).filter(c=>S.qCategories[c]).length===0){
     QCATEGORY_META.forEach(([n])=>{ if(n!=='Custom Questions') S.qCategories[n]=true; });
   }
-  document.getElementById('themeBtn').onclick=toggleTheme;
-  document.getElementById('themeBtn2').onclick=toggleTheme;
-  document.getElementById('themeBtn3').onclick=toggleTheme;
+  if(Object.keys(S.uCategories).filter(c=>S.uCategories[c]).length===0){
+    CATEGORY_META.forEach(([n])=>{ if(n!=='Custom Words') S.uCategories[n]=true; });
+  }
+  ['themeBtn','themeBtn2','themeBtn3','themeBtn4','themeBtn5'].forEach(id=>{ const b=document.getElementById(id); if(b) b.onclick=toggleTheme; });
   applyThemeBtns();
   setMode(S.mode);
   document.getElementById('cwWord').addEventListener('keydown',e=>{if(e.key==='Enter')addCustom();});
   document.getElementById('cwHint').addEventListener('keydown',e=>{if(e.key==='Enter')addCustom();});
   document.getElementById('qcwImp').addEventListener('keydown',e=>{if(e.key==='Enter')addQCustom();});
   document.getElementById('qanswerInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitQAnswer();});
+  document.getElementById('ucwB').addEventListener('keydown',e=>{if(e.key==='Enter')addUCustom();});
+  document.getElementById('wcwImp').addEventListener('keydown',e=>{if(e.key==='Enter')addWCustom();});
   paintIcons();
   renderSetup();
 }

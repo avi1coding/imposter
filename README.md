@@ -1,15 +1,17 @@
 # 🕵️ Imposter
 
-A pass-and-play party game for **3–99 players** on a single phone — like Spyfall / The Chameleon. Two game modes:
+A pass-and-play party game for **3–99 players** on a single phone — like Spyfall / The Chameleon. **Four game modes:**
 
 - **🃏 Words** — everyone gets the same secret word… except the **imposter(s)**, who only get a small hint. Take turns saying one related word, then discuss and vote.
 - **💬 Questions** — everyone answers the same question… except the imposter(s), who secretly get a *different* question with a similar-sounding answer. Type your answers, reveal them all, and spot whose answer doesn't fit.
+- **🕵️ Undercover** — everyone gets a word… except the imposter, who gets a *look-alike* (Dog vs Wolf). Describe your word one clue at a time — the imposter doesn't even know theirs is different.
+- **🎚️ Wavelength** — everyone rates the same thing on a slider (Cheap ↔ Expensive)… except the imposter, who secretly rates a *different* thing. All the dials reveal at once — whose dot is the outlier?
 
 **▶ Play it:** open [`index.html`](index.html) in any browser (works offline). On iPhone, use *Share → Add to Home Screen* to play it fullscreen like a native app.
 
 ## Features
 
-- 🃏💬 **Two modes** — Words and Questions — pick one on the home screen
+- 🎮 **Four modes** — Words, Questions, Undercover, Wavelength — pick one on the home screen
 - 🎨 Purple/black theme with a light-mode (purple/white) toggle
 - 👥 3–99 players with custom names · 1–3 imposters (random option, "imposter never goes first")
 - 🗂️ Words: **18 categories · 990 super-common words**, each with a safe 1–2 word imposter hint
