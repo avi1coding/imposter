@@ -308,6 +308,33 @@
   .coimp .i svg{width:15px;height:15px;stroke:#fde68a;}
   .coimp .i{vertical-align:middle;margin-right:4px;}
   .tap .i svg{width:18px;height:18px;}
+
+  /* ===== questions mode ===== */
+  .modeseg{display:flex;gap:6px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:5px;}
+  .modeseg-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;border:none;background:transparent;color:var(--muted);
+    font-size:15px;font-weight:750;padding:12px;border-radius:12px;cursor:pointer;transition:all .15s;}
+  .modeseg-btn .i svg{width:17px;height:17px;}
+  .modeseg-btn.on{background:linear-gradient(120deg,var(--accent2),var(--accent));color:#fff;box-shadow:0 6px 16px rgba(124,58,237,.4);}
+  .secretbox .qtext{font-size:23px;font-weight:800;color:#fff;line-height:1.28;animation:pop .4s ease;text-shadow:0 2px 16px rgba(0,0,0,.4);padding:0 4px;}
+  .qbig{background:var(--card);border:1px solid var(--card-border);border-radius:18px;padding:20px 18px;font-size:20px;font-weight:800;
+    line-height:1.3;text-align:center;box-shadow:var(--shadow);}
+  .qcat-line{text-align:center;color:var(--muted);font-size:13px;margin:10px 0 2px;}
+  .anslist{display:flex;flex-direction:column;gap:9px;margin-top:12px;}
+  .ansrow{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:11px 13px;}
+  .ansrow.imp{background:rgba(251,113,133,.12);border-color:rgba(251,113,133,.45);}
+  .av-mini{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:15px;font-weight:800;color:#fff;
+    background:radial-gradient(circle at 35% 30%,#a78bfa,#7c3aed 60%,#4c1d95);}
+  .ansrow.imp .av-mini{background:radial-gradient(circle at 35% 30%,#fda4af,#e11d48);}
+  .ans-tt{min-width:0;flex:1;}
+  .ans-tt b{font-size:13.5px;font-weight:700;display:block;color:var(--muted);}
+  .ans-tt span{font-size:16.5px;color:var(--text);display:block;margin-top:1px;word-break:break-word;font-weight:600;}
+  .ansrow .tag{margin-left:auto;color:var(--bad);font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:none;}
+  .qpair{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
+  .qpair-row{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:14px 16px;}
+  .qpair-row.imp{background:rgba(251,113,133,.1);border-color:rgba(251,113,133,.4);}
+  .qpair-lbl{display:block;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+  .qpair-row.imp .qpair-lbl{color:var(--bad);}
+  .qpair-q{display:block;font-size:16.5px;font-weight:700;line-height:1.3;}
 </style>
 </head>
 <body>
@@ -323,14 +350,18 @@
     <div style="text-align:center;">
       <div class="brandmark"><span class="i" data-icon="mask" data-size="54"></span></div>
       <h1 class="brand">IMPOSTER</h1>
-      <p class="tagline">One word. One faker. Find them.</p>
+      <p class="tagline" id="tagline">One word. One faker. Find them.</p>
     </div>
     <div class="spacer"></div>
-    <div class="stack">
-      <button class="btn btn-primary" onclick="go('setup')"><span class="i" data-icon="play" data-size="20"></span>Start Round</button>
-      <button class="btn btn-ghost" onclick="go('rules')"><span class="i" data-icon="book" data-size="20"></span>Explain Rules</button>
+    <div class="modeseg" id="modeSeg">
+      <button class="modeseg-btn on" data-mode="word" onclick="setMode('word')"><span class="i" data-icon="grid" data-size="17"></span>Words</button>
+      <button class="modeseg-btn" data-mode="questions" onclick="setMode('questions')"><span class="i" data-icon="chat" data-size="17"></span>Questions</button>
     </div>
-    <p class="modal-note">Pass-and-play · 3–99 players · one device</p>
+    <div class="stack" style="margin-top:14px;">
+      <button class="btn btn-primary" onclick="startRound()"><span class="i" data-icon="play" data-size="20"></span>Start Round</button>
+      <button class="btn btn-ghost" onclick="openRules()"><span class="i" data-icon="book" data-size="20"></span>Explain Rules</button>
+    </div>
+    <p class="modal-note" id="homeNote">Pass-and-play · 3–99 players · one device</p>
   </section>
 
   <!-- ============ RULES ============ -->
@@ -338,19 +369,29 @@
     <div class="topbar"><button class="back" onclick="go('home')">‹ Back</button><span></span></div>
     <h2>How to play</h2>
     <p class="sub">Everyone shares one phone and passes it around.</p>
-    <div class="card">
+    <div class="card" id="rulesWord">
       <ul class="rules-list">
         <li><div><b>Everyone gets a secret word</b><p>A random category and word are chosen. Most players see the word.</p></div></li>
         <li><div><b>…except the imposter(s)</b><p>The imposter doesn't get the word — just that they're the imposter (and maybe a small hint).</p></div></li>
-        <li><div><b>Pass & peek</b><p>Tap your card, tap the box to secretly reveal your role, then pass the phone on.</p></div></li>
+        <li><div><b>Pass &amp; peek</b><p>Tap your card, tap the box to secretly reveal your role, then pass the phone on.</p></div></li>
         <li><div><b>Take turns describing</b><p>Going clockwise, each player says one word related to the secret word — vague enough to be safe, clear enough to prove you know it.</p></div></li>
         <li><div><b>Imposter blends in</b><p>The imposter fakes it, trying to guess the word from what others say without getting caught.</p></div></li>
         <li><div><b>Discuss &amp; vote</b><p>After a couple of rounds, talk it out and vote on who the imposter is.</p></div></li>
-        <li><div><b>Reveal</b><p>Show the results. Players win if they catch the imposter. The imposter wins by surviving — or by guessing the word.</p></div></li>
+        <li><div><b>Reveal</b><p>Players win if they catch the imposter. The imposter wins by surviving — or by guessing the word.</p></div></li>
+      </ul>
+    </div>
+    <div class="card" id="rulesQ" style="display:none;">
+      <ul class="rules-list">
+        <li><div><b>Everyone gets a question</b><p>A random category and question are chosen. Most players get the same question.</p></div></li>
+        <li><div><b>…except the imposter(s)</b><p>The imposter gets a <b>different</b> question in the same category — one with a similar-sounding answer.</p></div></li>
+        <li><div><b>Pass, reveal &amp; answer</b><p>Tap your card, reveal your question, type a short answer, then pass the phone on.</p></div></li>
+        <li><div><b>Answers revealed</b><p>Once everyone's answered, the real question and all the answers are shown together.</p></div></li>
+        <li><div><b>Spot the odd one out</b><p>The imposter answered a different question — so their answer won't quite fit. Discuss and vote.</p></div></li>
+        <li><div><b>Reveal</b><p>See who the imposter was and the sneaky question they actually had.</p></div></li>
       </ul>
     </div>
     <div class="spacer"></div>
-    <button class="btn btn-primary" onclick="go('setup')">Got it — Start Round</button>
+    <button class="btn btn-primary" onclick="startRound()">Got it — Start Round</button>
   </section>
 
   <!-- ============ SETUP ============ -->
@@ -403,19 +444,19 @@
 
   <!-- ============ PLAYERS ============ -->
   <section id="players" class="screen">
-    <div class="topbar"><button class="back" onclick="go('setup')">‹ Setup</button>
+    <div class="topbar"><button class="back" onclick="backToSetup()">‹ Setup</button>
       <span class="count-pill" id="pcount">4</span></div>
     <h2>Players</h2>
     <p class="sub">3–99 players. Tap a name to edit it.</p>
     <div class="plist" id="plist"></div>
     <button class="btn btn-ghost" style="margin-top:14px;" id="addPlayerBtn" onclick="addPlayer()">＋ Add player</button>
     <div class="spacer"></div>
-    <button class="btn btn-primary" onclick="go('setup')">Done</button>
+    <button class="btn btn-primary" onclick="backToSetup()">Done</button>
   </section>
 
   <!-- ============ IMPOSTERS ============ -->
   <section id="imposters" class="screen">
-    <div class="topbar"><button class="back" onclick="go('setup')">‹ Setup</button><span></span></div>
+    <div class="topbar"><button class="back" onclick="backToSetup()">‹ Setup</button><span></span></div>
     <h2>Imposters</h2>
     <p class="sub">How many fakers each round?</p>
     <div class="card" id="impStepCard">
@@ -431,13 +472,13 @@
         <div class="lbl"><b>Random amount each game</b><span>Randomly pick 1–3 imposters per round</span></div>
         <div class="switch" data-opt="randomImposters" onclick="toggleOpt(this);renderImp()"><span class="knob"></span></div>
       </div>
-      <div class="switch-row">
+      <div class="switch-row" id="neverFirstRow">
         <div class="lbl"><b>Imposter never goes first</b><span>The starting player is never an imposter</span></div>
         <div class="switch" data-opt="imposterNeverFirst" onclick="toggleOpt(this)"><span class="knob"></span></div>
       </div>
     </div>
     <div class="spacer"></div>
-    <button class="btn btn-primary" onclick="go('setup')">Done</button>
+    <button class="btn btn-primary" onclick="backToSetup()">Done</button>
   </section>
 
   <!-- ============ CATEGORIES ============ -->
@@ -483,7 +524,7 @@
     <p class="sub">Each player taps their card, peeks, then passes the phone.</p>
     <div class="pgrid" id="pgrid"></div>
     <div class="spacer"></div>
-    <button class="btn btn-primary" id="toVoteBtn" disabled onclick="go('play')">Everyone's seen it →</button>
+    <button class="btn btn-primary" id="toVoteBtn" disabled onclick="afterReveal()">Everyone's seen it →</button>
   </section>
 
   <!-- ============ ROLE REVEAL ============ -->
@@ -544,29 +585,152 @@
     </div>
   </section>
 
+  <!-- ============ QUESTIONS: SETUP ============ -->
+  <section id="qsetup" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">‹ Home</button>
+      <button class="icon-btn" id="themeBtn3" title="Toggle theme"></button></div>
+    <h2>Questions Setup</h2>
+    <p class="sub">Tap a box to set it up, then start.</p>
+    <div class="stack">
+      <div class="grid2">
+        <button class="tile" onclick="go('players')">
+          <span class="emoji"><span class="i" data-icon="users" data-size="26"></span></span>
+          <span class="tt"><b>Players</b><span id="qSumPlayers">4 players</span></span>
+        </button>
+        <button class="tile" onclick="go('imposters')">
+          <span class="emoji"><span class="i" data-icon="mask" data-size="26"></span></span>
+          <span class="tt"><b>Imposters</b><span id="qSumImp">1 imposter</span></span>
+        </button>
+      </div>
+      <button class="tile" onclick="go('qcats')">
+        <span class="emoji"><span class="i" data-icon="grid" data-size="26"></span></span>
+        <span class="tt"><b>Categories</b><span id="qSumCats">Select categories to play with</span></span>
+        <span class="chev">›</span>
+      </button>
+      <button class="tile" onclick="go('qcustom')">
+        <span class="emoji"><span class="i" data-icon="pencil" data-size="26"></span></span>
+        <span class="tt"><b>Custom Questions</b><span id="qSumCustom">Add your own question pairs (optional)</span></span>
+        <span class="chev">›</span>
+      </button>
+      <div class="card" style="padding:6px 16px;">
+        <div class="switch-row">
+          <div class="lbl"><b>Show category to imposter</b><span>Imposter sees which category it is</span></div>
+          <div class="switch on" data-opt="showCategoryToImposter" onclick="toggleOpt(this)"><span class="knob"></span></div>
+        </div>
+        <div class="switch-row">
+          <div class="lbl"><b>Imposters know each other</b><span>Multiple imposters see their teammates</span></div>
+          <div class="switch" data-opt="impostersKnowEachOther" onclick="toggleOpt(this)"><span class="knob"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="err" id="qsetupErr"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" onclick="startQGame()">Start Game</button>
+  </section>
+
+  <!-- ============ QUESTIONS: CATEGORIES ============ -->
+  <section id="qcats" class="screen">
+    <div class="topbar"><button class="back" onclick="go('qsetup')">‹ Setup</button>
+      <span class="count-pill" id="qccount">0</span></div>
+    <h2>Categories</h2>
+    <p class="sub">Pick any you like. A random question comes from one of these.</p>
+    <div class="cats-head">
+      <div class="lead"><b id="qccount2">0</b> selected</div>
+      <div class="seg">
+        <button class="seg-btn" onclick="allQCats(true)">Select all</button>
+        <button class="seg-btn" onclick="allQCats(false)">Clear</button>
+      </div>
+    </div>
+    <div class="catgrid" id="qcatList"></div>
+    <div class="spacer" style="min-height:14px;"></div>
+    <button class="btn btn-primary" onclick="go('qsetup')">Done</button>
+  </section>
+
+  <!-- ============ QUESTIONS: CUSTOM ============ -->
+  <section id="qcustom" class="screen">
+    <div class="topbar"><button class="back" onclick="go('qsetup')">‹ Setup</button>
+      <span class="count-pill" id="qcwcount">0</span></div>
+    <h2>Custom Questions</h2>
+    <p class="sub">Add a question pair. The imposter gets the second one — give them similar answers!</p>
+    <input class="field" id="qcwMain" placeholder="Everyone's question" autocomplete="off" />
+    <input class="field" id="qcwImp" placeholder="Imposter's question (similar answer)" autocomplete="off" style="margin-top:10px;" />
+    <button class="btn btn-ghost" style="margin-top:10px;" onclick="addQCustom()">＋ Add pair</button>
+    <p class="hintline">Enable them by picking “Custom Questions” in Categories.</p>
+    <div class="plist" id="qcwlist" style="margin-top:8px;"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" onclick="go('qsetup')">Done</button>
+  </section>
+
+  <!-- ============ QUESTIONS: REVEAL + ANSWER ============ -->
+  <section id="qrole" class="screen">
+    <div class="topbar"><button class="back" id="qroleBack" onclick="go('pass')">‹ Back</button><span></span></div>
+    <div class="reveal-wrap">
+      <div class="reveal-name" id="qroleName">The question for —</div>
+      <div class="reveal-cat" id="qroleCat"></div>
+      <div class="secretbox" id="qsecretbox" onclick="doQReveal()">
+        <div class="tap"><span class="i" data-icon="eye"></span> Tap to reveal your question</div>
+      </div>
+      <div id="qroleExtra"></div>
+      <div id="qanswerWrap" style="display:none;width:min(340px,88vw);">
+        <input class="field" id="qanswerInput" placeholder="Type your answer…" maxlength="40" autocomplete="off" style="text-align:center;font-size:17px;" />
+        <button class="btn btn-primary" style="margin-top:12px;" onclick="submitQAnswer()">Submit &amp; pass</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ QUESTIONS: DISCUSS ============ -->
+  <section id="qdiscuss" class="screen">
+    <div class="topbar"><button class="back" onclick="go('pass')">‹ Back</button><span></span></div>
+    <h2>The answers are in</h2>
+    <p class="sub">Everyone was asked…</p>
+    <div class="qbig" id="qMainQuestion">—</div>
+    <div class="qcat-line" id="qDiscussCat"></div>
+    <div class="anslist" id="qAnswerList"></div>
+    <p class="modal-note">Whose answer fits the question least? Discuss and vote.</p>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" onclick="go('qresults')"><span class="i" data-icon="masks" data-size="20"></span>Reveal Results</button>
+  </section>
+
+  <!-- ============ QUESTIONS: RESULTS ============ -->
+  <section id="qresults" class="screen">
+    <div class="topbar"><span></span><span></span></div>
+    <h2 style="text-align:center;display:flex;align-items:center;justify-content:center;gap:10px;"><span class="i" data-icon="masks" data-size="26" style="color:var(--accent)"></span>The reveal</h2>
+    <div class="imp-reveal" id="qImpReveal" style="margin-top:8px;"></div>
+    <div class="qpair">
+      <div class="qpair-row"><span class="qpair-lbl">Everyone's question</span><span class="qpair-q" id="qResMain">—</span></div>
+      <div class="qpair-row imp"><span class="qpair-lbl">Imposter's question</span><span class="qpair-q" id="qResImp">—</span></div>
+    </div>
+    <div class="anslist" id="qResAnswers" style="margin-top:14px;"></div>
+    <div class="spacer"></div>
+    <div class="stack">
+      <button class="btn btn-primary" onclick="newQRound()"><span class="i" data-icon="refresh" data-size="20"></span>New Round (same players)</button>
+      <button class="btn btn-ghost" onclick="go('home')"><span class="i" data-icon="home" data-size="20"></span>Home</button>
+    </div>
+  </section>
+
 </div>
 
 <script>
 /* ================= WORD DATA (injected) ================= */
 const WORDS = {
-  "Food": [{w:"Pizza",h:"Cheesy"},{w:"Burger",h:"Grill"},{w:"Hot Dog",h:"Picnic"},{w:"Sandwich",h:"Lunch"},{w:"Pasta",h:"Italian"},{w:"Rice",h:"Grain"},{w:"Bread",h:"Bakery"},{w:"Egg",h:"Breakfast"},{w:"Cheese",h:"Dairy"},{w:"Bacon",h:"Crispy"},{w:"Ham",h:"Meat"},{w:"Steak",h:"Dinner"},{w:"Sausage",h:"Grill"},{w:"Soup",h:"Warm"},{w:"Salad",h:"Healthy"},{w:"Fries",h:"Salty"},{w:"Cake",h:"Dessert"},{w:"Cookie",h:"Treat"},{w:"Ice Cream",h:"Cold"},{w:"Chocolate",h:"Sweet"},{w:"Candy",h:"Sugary"},{w:"Donut",h:"Bakery"},{w:"Pancake",h:"Breakfast"},{w:"Waffle",h:"Morning"},{w:"Cereal",h:"Bowl"},{w:"Apple",h:"Fruit"},{w:"Banana",h:"Fruit"},{w:"Orange",h:"Fruit"},{w:"Grape",h:"Fruit"},{w:"Strawberry",h:"Fruit"},{w:"Watermelon",h:"Fruit"},{w:"Lemon",h:"Fruit"},{w:"Peach",h:"Fruit"},{w:"Pineapple",h:"Fruit"},{w:"Cherry",h:"Fruit"},{w:"Carrot",h:"Veggie"},{w:"Potato",h:"Veggie"},{w:"Tomato",h:"Veggie"},{w:"Corn",h:"Veggie"},{w:"Onion",h:"Veggie"},{w:"Broccoli",h:"Veggie"},{w:"Peas",h:"Veggie"},{w:"Popcorn",h:"Snack"},{w:"Chips",h:"Crunchy"},{w:"Pretzel",h:"Salty"},{w:"Peanut",h:"Snack"},{w:"Honey",h:"Sweet"},{w:"Butter",h:"Creamy"},{w:"Jam",h:"Spread"},{w:"Pie",h:"Dessert"},{w:"Muffin",h:"Bakery"},{w:"Meatball",h:"Meat"},{w:"Taco",h:"Dinner"},{w:"Noodles",h:"Bowl"},{w:"Toast",h:"Breakfast"}],
-  "Drinks": [{w:"Water",h:"Clear"},{w:"Milk",h:"White"},{w:"Coffee",h:"Morning"},{w:"Tea",h:"Warm"},{w:"Juice",h:"Fruity"},{w:"Soda",h:"Fizzy"},{w:"Lemonade",h:"Summer"},{w:"Cola",h:"Bubbly"},{w:"Milkshake",h:"Creamy"},{w:"Smoothie",h:"Healthy"},{w:"Orange Soda",h:"Fizzy"},{w:"Beer",h:"Cold"},{w:"Wine",h:"Fancy"},{w:"Champagne",h:"Bubbly"},{w:"Whiskey",h:"Strong"},{w:"Vodka",h:"Strong"},{w:"Rum",h:"Strong"},{w:"Cider",h:"Fruity"},{w:"Iced Tea",h:"Cold"},{w:"Root Beer",h:"Fizzy"},{w:"Orange Juice",h:"Breakfast"},{w:"Espresso",h:"Strong"},{w:"Latte",h:"Creamy"},{w:"Cappuccino",h:"Foamy"},{w:"Slushie",h:"Icy"},{w:"Punch",h:"Party"},{w:"Coconut Water",h:"Tropical"},{w:"Sparkling Water",h:"Bubbly"},{w:"Ginger Ale",h:"Fizzy"},{w:"Sports Drink",h:"Colorful"},{w:"Energy Drink",h:"Cold"},{w:"Apple Juice",h:"Fruity"},{w:"Grape Juice",h:"Sweet"},{w:"Tomato Juice",h:"Red"},{w:"Herbal Tea",h:"Warm"},{w:"Green Tea",h:"Healthy"},{w:"Black Coffee",h:"Strong"},{w:"Hot Chocolate",h:"Cozy"},{w:"Eggnog",h:"Holiday"},{w:"Kool Aid",h:"Colorful"},{w:"Mocha",h:"Warm"},{w:"Chocolate Milk",h:"Sweet"},{w:"Strawberry Milk",h:"Sweet"},{w:"Iced Coffee",h:"Cold"},{w:"Margarita",h:"Party"},{w:"Martini",h:"Fancy"},{w:"Tequila",h:"Strong"},{w:"Gin",h:"Strong"},{w:"Brandy",h:"Strong"},{w:"Sake",h:"Warm"},{w:"Mineral Water",h:"Clear"},{w:"Milk Tea",h:"Creamy"},{w:"Cranberry Juice",h:"Fruity"},{w:"Pineapple Juice",h:"Tropical"},{w:"Frappe",h:"Icy"}],
-  "Animals": [{w:"Dog",h:"Furry"},{w:"Cat",h:"Pet"},{w:"Cow",h:"Farm"},{w:"Pig",h:"Farm"},{w:"Horse",h:"Barn"},{w:"Sheep",h:"Fluffy"},{w:"Goat",h:"Farm"},{w:"Chicken",h:"Farm"},{w:"Duck",h:"Pond"},{w:"Rabbit",h:"Cute"},{w:"Mouse",h:"Tiny"},{w:"Rat",h:"Sneaky"},{w:"Lion",h:"Wild"},{w:"Tiger",h:"Wild"},{w:"Bear",h:"Forest"},{w:"Elephant",h:"Huge"},{w:"Giraffe",h:"Zoo"},{w:"Zebra",h:"Wild"},{w:"Monkey",h:"Jungle"},{w:"Gorilla",h:"Strong"},{w:"Kangaroo",h:"Zoo"},{w:"Panda",h:"Cute"},{w:"Fox",h:"Woods"},{w:"Wolf",h:"Wild"},{w:"Deer",h:"Forest"},{w:"Squirrel",h:"Tree"},{w:"Frog",h:"Green"},{w:"Snake",h:"Long"},{w:"Turtle",h:"Pond"},{w:"Lizard",h:"Scaly"},{w:"Fish",h:"Water"},{w:"Shark",h:"Ocean"},{w:"Whale",h:"Huge"},{w:"Dolphin",h:"Ocean"},{w:"Octopus",h:"Sea"},{w:"Crab",h:"Beach"},{w:"Bird",h:"Sky"},{w:"Owl",h:"Night"},{w:"Eagle",h:"Sky"},{w:"Penguin",h:"Cold"},{w:"Parrot",h:"Colorful"},{w:"Bee",h:"Garden"},{w:"Ant",h:"Tiny"},{w:"Spider",h:"Creepy"},{w:"Butterfly",h:"Pretty"},{w:"Ladybug",h:"Garden"},{w:"Bat",h:"Night"},{w:"Camel",h:"Zoo"},{w:"Hippo",h:"Big"},{w:"Rhino",h:"Tough"},{w:"Crocodile",h:"Scary"},{w:"Turkey",h:"Farm"},{w:"Donkey",h:"Farm"},{w:"Hamster",h:"Pet"},{w:"Peacock",h:"Fancy"}],
-  "Countries": [{w:"France",h:"Europe"},{w:"Germany",h:"Europe"},{w:"Italy",h:"Europe"},{w:"Spain",h:"Europe"},{w:"England",h:"Europe"},{w:"Ireland",h:"Europe"},{w:"Portugal",h:"Europe"},{w:"Greece",h:"Europe"},{w:"Switzerland",h:"Europe"},{w:"Netherlands",h:"Europe"},{w:"Belgium",h:"Europe"},{w:"Sweden",h:"Cold"},{w:"Norway",h:"Cold"},{w:"Denmark",h:"Europe"},{w:"Finland",h:"Cold"},{w:"Poland",h:"Europe"},{w:"Russia",h:"Cold"},{w:"Turkey",h:"Europe"},{w:"Ukraine",h:"Europe"},{w:"Austria",h:"Europe"},{w:"United States",h:"Big"},{w:"Canada",h:"Cold"},{w:"Mexico",h:"Warm"},{w:"Brazil",h:"Warm"},{w:"Argentina",h:"Warm"},{w:"Chile",h:"Warm"},{w:"Colombia",h:"Warm"},{w:"Peru",h:"Warm"},{w:"Cuba",h:"Island"},{w:"Jamaica",h:"Island"},{w:"China",h:"Asia"},{w:"Japan",h:"Asia"},{w:"India",h:"Asia"},{w:"South Korea",h:"Asia"},{w:"Thailand",h:"Asia"},{w:"Vietnam",h:"Asia"},{w:"Indonesia",h:"Asia"},{w:"Philippines",h:"Asia"},{w:"Malaysia",h:"Asia"},{w:"Singapore",h:"Asia"},{w:"Pakistan",h:"Asia"},{w:"Iran",h:"Hot"},{w:"Iraq",h:"Hot"},{w:"Israel",h:"Hot"},{w:"Saudi Arabia",h:"Hot"},{w:"Egypt",h:"Hot"},{w:"Morocco",h:"Africa"},{w:"Nigeria",h:"Africa"},{w:"Kenya",h:"Africa"},{w:"South Africa",h:"Warm"},{w:"Australia",h:"Hot"},{w:"New Zealand",h:"Island"},{w:"Iceland",h:"Cold"},{w:"Cambodia",h:"Asia"},{w:"Ghana",h:"Africa"}],
-  "Furniture": [{w:"Chair",h:"Sit"},{w:"Table",h:"Flat"},{w:"Bed",h:"Sleep"},{w:"Sofa",h:"Comfy"},{w:"Couch",h:"Cozy"},{w:"Desk",h:"Work"},{w:"Stool",h:"Seat"},{w:"Bench",h:"Seat"},{w:"Bookshelf",h:"Storage"},{w:"Wardrobe",h:"Clothes"},{w:"Dresser",h:"Bedroom"},{w:"Cabinet",h:"Storage"},{w:"Cupboard",h:"Kitchen"},{w:"Drawer",h:"Handle"},{w:"Nightstand",h:"Bedroom"},{w:"Coffee Table",h:"Living room"},{w:"Dining Table",h:"Food"},{w:"Armchair",h:"Comfy"},{w:"Recliner",h:"Relax"},{w:"Rocking Chair",h:"Sit"},{w:"Bunk Bed",h:"Kids"},{w:"Crib",h:"Baby"},{w:"Mattress",h:"Soft"},{w:"Pillow",h:"Fluffy"},{w:"Lamp",h:"Light"},{w:"Mirror",h:"Glass"},{w:"Rug",h:"Floor"},{w:"Curtain",h:"Window"},{w:"Shelf",h:"Wall"},{w:"Closet",h:"Clothes"},{w:"Wall Clock",h:"Round"},{w:"Footstool",h:"Small"},{w:"Bar Stool",h:"Tall"},{w:"Ottoman",h:"Rest"},{w:"Chandelier",h:"Ceiling"},{w:"Fireplace",h:"Warm"},{w:"Television",h:"Plug"},{w:"Bathtub",h:"Water"},{w:"Sink",h:"Water"},{w:"Toilet",h:"Bathroom"},{w:"Refrigerator",h:"Cold"},{w:"Oven",h:"Cook"},{w:"Stove",h:"Hot"},{w:"Microwave",h:"Heat"},{w:"Dishwasher",h:"Clean"},{w:"Washing Machine",h:"Clothes"},{w:"Bookcase",h:"Wooden"},{w:"Vanity",h:"Bedroom"},{w:"Hammock",h:"Backyard"},{w:"High Chair",h:"Baby"},{w:"Wall Shelf",h:"Storage"},{w:"Sideboard",h:"Storage"},{w:"Loveseat",h:"Cozy"},{w:"Chest",h:"Wooden"},{w:"Cushion",h:"Soft"}],
-  "Times & Weather": [{w:"Morning",h:"Early"},{w:"Noon",h:"Sun"},{w:"Afternoon",h:"Daytime"},{w:"Evening",h:"Late"},{w:"Night",h:"Dark"},{w:"Midnight",h:"Dark"},{w:"Midday",h:"Bright"},{w:"Dawn",h:"Early"},{w:"Dusk",h:"Dim"},{w:"Sunrise",h:"Early"},{w:"Sunset",h:"Sky"},{w:"Lunchtime",h:"Hungry"},{w:"Bedtime",h:"Sleepy"},{w:"Breakfast",h:"Meal"},{w:"Dinnertime",h:"Food"},{w:"Spring",h:"Season"},{w:"Summer",h:"Season"},{w:"Autumn",h:"Season"},{w:"Winter",h:"Season"},{w:"January",h:"Month"},{w:"February",h:"Month"},{w:"March",h:"Month"},{w:"April",h:"Month"},{w:"May",h:"Month"},{w:"June",h:"Month"},{w:"July",h:"Month"},{w:"August",h:"Month"},{w:"September",h:"Month"},{w:"October",h:"Month"},{w:"November",h:"Month"},{w:"December",h:"Month"},{w:"Rain",h:"Wet"},{w:"Snow",h:"Icy"},{w:"Sunny",h:"Bright"},{w:"Cloudy",h:"Grey"},{w:"Windy",h:"Air"},{w:"Storm",h:"Wild"},{w:"Thunder",h:"Loud"},{w:"Lightning",h:"Sky"},{w:"Fog",h:"Grey"},{w:"Hail",h:"Icy"},{w:"Rainbow",h:"Sky"},{w:"Breeze",h:"Air"},{w:"Frost",h:"Icy"},{w:"Heatwave",h:"Sweaty"},{w:"Drizzle",h:"Wet"},{w:"Hot",h:"Sun"},{w:"Cold",h:"Shiver"},{w:"Warm",h:"Cozy"},{w:"Cool",h:"Fresh"},{w:"Weekend",h:"Free"},{w:"Weekday",h:"Work"},{w:"Sunshine",h:"Bright"},{w:"Overcast",h:"Grey"},{w:"Humid",h:"Sticky"}],
-  "Places": [{w:"Beach",h:"Sandy"},{w:"Park",h:"Grassy"},{w:"School",h:"Learning"},{w:"Hospital",h:"Sick"},{w:"Airport",h:"Travel"},{w:"Zoo",h:"Wild"},{w:"Gym",h:"Sweaty"},{w:"Restaurant",h:"Food"},{w:"Library",h:"Quiet"},{w:"Museum",h:"Old"},{w:"Bank",h:"Counter"},{w:"Church",h:"Peaceful"},{w:"Farm",h:"Fields"},{w:"Hotel",h:"Beds"},{w:"Cinema",h:"Dark"},{w:"Supermarket",h:"Shopping"},{w:"Pool",h:"Swim"},{w:"Playground",h:"Kids"},{w:"Office",h:"Work"},{w:"Station",h:"Tickets"},{w:"Bakery",h:"Yummy"},{w:"Forest",h:"Green"},{w:"Mountain",h:"Tall"},{w:"Cafe",h:"Cozy"},{w:"Stadium",h:"Crowd"},{w:"Bridge",h:"Cross"},{w:"Castle",h:"Stone"},{w:"Prison",h:"Locked"},{w:"Garden",h:"Plants"},{w:"Kitchen",h:"Cooking"},{w:"Bedroom",h:"Sleep"},{w:"Bathroom",h:"Wash"},{w:"Garage",h:"Cars"},{w:"Mall",h:"Stores"},{w:"Pharmacy",h:"Health"},{w:"Post Office",h:"Sending"},{w:"Fire Station",h:"Emergency"},{w:"Bus Stop",h:"Waiting"},{w:"Theater",h:"Show"},{w:"Circus",h:"Funny"},{w:"Desert",h:"Hot"},{w:"Island",h:"Ocean"},{w:"River",h:"Flowing"},{w:"Lake",h:"Water"},{w:"Cave",h:"Rocky"},{w:"Waterfall",h:"Splashy"},{w:"Harbor",h:"Boats"},{w:"Lighthouse",h:"Bright"},{w:"Barn",h:"Animals"},{w:"Factory",h:"Machines"},{w:"Camp",h:"Outside"},{w:"Amusement Park",h:"Fun"},{w:"Aquarium",h:"Fish"},{w:"Salon",h:"Beauty"},{w:"Dentist",h:"Checkup"}],
-  "Tools & Instruments": [{w:"Hammer",h:"Building"},{w:"Screwdriver",h:"Fixing"},{w:"Saw",h:"Cutting"},{w:"Drill",h:"Handy"},{w:"Wrench",h:"Garage"},{w:"Pliers",h:"Squeeze"},{w:"Axe",h:"Chopping"},{w:"Shovel",h:"Digging"},{w:"Rake",h:"Garden"},{w:"Nail",h:"Tiny"},{w:"Tape Measure",h:"Numbers"},{w:"Level",h:"Straight"},{w:"Chisel",h:"Carving"},{w:"File",h:"Smoothing"},{w:"Sandpaper",h:"Rough"},{w:"Ladder",h:"Tall"},{w:"Scissors",h:"Sharp"},{w:"Knife",h:"Kitchen"},{w:"Paintbrush",h:"Colors"},{w:"Broom",h:"Cleaning"},{w:"Wheelbarrow",h:"Carrying"},{w:"Clamp",h:"Holding"},{w:"Screw",h:"Twist"},{w:"Toolbox",h:"Storage"},{w:"Crowbar",h:"Metal"},{w:"Stapler",h:"Office"},{w:"Mallet",h:"Pounding"},{w:"Pickaxe",h:"Mining"},{w:"Guitar",h:"Strings"},{w:"Piano",h:"Keys"},{w:"Drums",h:"Beat"},{w:"Violin",h:"Strings"},{w:"Flute",h:"Blowing"},{w:"Trumpet",h:"Loud"},{w:"Saxophone",h:"Blowing"},{w:"Harmonica",h:"Pocket"},{w:"Banjo",h:"Strings"},{w:"Cello",h:"Strings"},{w:"Harp",h:"Strings"},{w:"Trombone",h:"Blowing"},{w:"Tuba",h:"Big"},{w:"Clarinet",h:"Blowing"},{w:"Xylophone",h:"Tapping"},{w:"Tambourine",h:"Shaking"},{w:"Accordion",h:"Squeeze"},{w:"Bagpipes",h:"Blowing"},{w:"Triangle",h:"Ringing"},{w:"Cymbals",h:"Crashing"},{w:"Bongos",h:"Beat"},{w:"Recorder",h:"Blowing"},{w:"Maracas",h:"Shaking"},{w:"Organ",h:"Keys"},{w:"Ukulele",h:"Strings"},{w:"Whistle",h:"Loud"},{w:"Gong",h:"Loud"}],
-  "Christmas": [{w:"Santa",h:"Merry"},{w:"Reindeer",h:"Animal"},{w:"Tree",h:"Green"},{w:"Snowman",h:"Cold"},{w:"Presents",h:"Surprise"},{w:"Stocking",h:"Hanging"},{w:"Elf",h:"Magic"},{w:"Sleigh",h:"Ride"},{w:"Ornament",h:"Shiny"},{w:"Tinsel",h:"Sparkly"},{w:"Wreath",h:"Round"},{w:"Mistletoe",h:"Plant"},{w:"Candy Cane",h:"Sweet"},{w:"Gingerbread",h:"Baked"},{w:"Carol",h:"Music"},{w:"Bells",h:"Sound"},{w:"Star",h:"Bright"},{w:"Chimney",h:"House"},{w:"Fireplace",h:"Warm"},{w:"Snowflake",h:"White"},{w:"Holly",h:"Leaves"},{w:"Candle",h:"Flame"},{w:"Nutcracker",h:"Wooden"},{w:"Angel",h:"Golden"},{w:"Nativity",h:"Story"},{w:"Fruitcake",h:"Dessert"},{w:"Eggnog",h:"Drink"},{w:"Wrapping Paper",h:"Colorful"},{w:"Ribbon",h:"Pretty"},{w:"Bow",h:"Fancy"},{w:"Turkey",h:"Dinner"},{w:"Sled",h:"Snow"},{w:"Icicle",h:"Frozen"},{w:"Frost",h:"Icy"},{w:"Snowball",h:"Winter"},{w:"Chestnuts",h:"Snack"},{w:"Poinsettia",h:"Flower"},{w:"Cookies",h:"Treat"},{w:"Garland",h:"Hanging"},{w:"Lights",h:"Glowing"},{w:"Snow",h:"White"},{w:"Sweater",h:"Cozy"},{w:"Scarf",h:"Warm"},{w:"Mittens",h:"Fuzzy"},{w:"Wish List",h:"Letter"},{w:"North Pole",h:"Snowy"},{w:"Workshop",h:"Making"},{w:"Snow Globe",h:"Glass"},{w:"Pudding",h:"Yummy"},{w:"Cracker",h:"Party"},{w:"Hot Chocolate",h:"Drink"},{w:"Candy",h:"Sweet"},{w:"Rudolph",h:"Animal"},{w:"Toys",h:"Play"},{w:"Peppermint",h:"Flavor"}],
-  "Holidays": [{w:"Halloween",h:"Fall"},{w:"Easter",h:"Spring"},{w:"Thanksgiving",h:"Family"},{w:"New Year",h:"Fireworks"},{w:"Birthday",h:"Party"},{w:"Valentine's Day",h:"Love"},{w:"Independence Day",h:"Summer"},{w:"Mother's Day",h:"Flowers"},{w:"Father's Day",h:"Family"},{w:"April Fools",h:"Funny"},{w:"Labor Day",h:"Summer"},{w:"Memorial Day",h:"Summer"},{w:"Anniversary",h:"Couple"},{w:"Wedding",h:"Ceremony"},{w:"Graduation",h:"School"},{w:"Baby Shower",h:"Gifts"},{w:"Retirement",h:"Work"},{w:"Hanukkah",h:"Winter"},{w:"Ramadan",h:"Faith"},{w:"Diwali",h:"Colorful"},{w:"Carnival",h:"Costumes"},{w:"Mardi Gras",h:"Party"},{w:"St Patrick's Day",h:"Spring"},{w:"Cinco de Mayo",h:"Festive"},{w:"Earth Day",h:"Nature"},{w:"Election Day",h:"Politics"},{w:"Groundhog Day",h:"Weather"},{w:"Veterans Day",h:"Military"},{w:"Columbus Day",h:"History"},{w:"Sweetest Day",h:"Romance"},{w:"Boxing Day",h:"Winter"},{w:"Chinese New Year",h:"Celebration"},{w:"Passover",h:"Faith"},{w:"Kwanzaa",h:"Culture"},{w:"Oktoberfest",h:"Autumn"},{w:"Prom",h:"Dance"},{w:"Homecoming",h:"School"},{w:"Quinceanera",h:"Party"},{w:"Bar Mitzvah",h:"Ceremony"},{w:"Reunion",h:"Friends"},{w:"Housewarming",h:"Party"},{w:"Bridal Shower",h:"Gifts"},{w:"Engagement",h:"Couple"},{w:"Christening",h:"Church"},{w:"Superbowl",h:"Sports"},{w:"Field Day",h:"Games"},{w:"Spring Break",h:"Vacation"},{w:"Summer Vacation",h:"Travel"},{w:"Presidents Day",h:"Leaders"},{w:"Flag Day",h:"Country"},{w:"May Day",h:"Spring"},{w:"Harvest Festival",h:"Fall"},{w:"Feast Day",h:"Faith"},{w:"Parade",h:"Crowd"},{w:"Festival",h:"Fun"}],
-  "Objects": [{w:"Umbrella",h:"Outside"},{w:"Keys",h:"Pocket"},{w:"Phone",h:"Screen"},{w:"Pillow",h:"Soft"},{w:"Mirror",h:"Shiny"},{w:"Clock",h:"Time"},{w:"Candle",h:"Glowing"},{w:"Backpack",h:"School"},{w:"Wallet",h:"Pocket"},{w:"Glasses",h:"Face"},{w:"Watch",h:"Wearing"},{w:"Toothbrush",h:"Bathroom"},{w:"Comb",h:"Bathroom"},{w:"Cup",h:"Drink"},{w:"Plate",h:"Dinner"},{w:"Spoon",h:"Kitchen"},{w:"Fork",h:"Eating"},{w:"Knife",h:"Sharp"},{w:"Bottle",h:"Water"},{w:"Book",h:"Reading"},{w:"Pencil",h:"Writing"},{w:"Pen",h:"Writing"},{w:"Scissors",h:"Cutting"},{w:"Soap",h:"Clean"},{w:"Towel",h:"Bathroom"},{w:"Blanket",h:"Warm"},{w:"Basket",h:"Carry"},{w:"Broom",h:"Cleaning"},{w:"Bucket",h:"Water"},{w:"Camera",h:"Flash"},{w:"Remote",h:"Buttons"},{w:"Flashlight",h:"Light"},{w:"Battery",h:"Power"},{w:"Rope",h:"Long"},{w:"Balloon",h:"Party"},{w:"Ball",h:"Round"},{w:"Ring",h:"Jewelry"},{w:"Necklace",h:"Fancy"},{w:"Hat",h:"Wearing"},{w:"Shoe",h:"Walking"},{w:"Sock",h:"Feet"},{w:"Belt",h:"Clothes"},{w:"Button",h:"Small"},{w:"Napkin",h:"Wipe"},{w:"Straw",h:"Drink"},{w:"Envelope",h:"Mail"},{w:"Stamp",h:"Sticky"},{w:"Magnet",h:"Metal"},{w:"Whistle",h:"Loud"},{w:"Kite",h:"Sky"},{w:"Jar",h:"Glass"},{w:"Bell",h:"Sound"},{w:"Fan",h:"Air"},{w:"Lamp",h:"Bright"},{w:"Purse",h:"Carry"}],
-  "Locations": [{w:"Desert",h:"Sandy"},{w:"Mountain",h:"Tall"},{w:"Island",h:"Water"},{w:"Forest",h:"Green"},{w:"River",h:"Flowing"},{w:"City",h:"Busy"},{w:"Village",h:"Small"},{w:"Cave",h:"Dark"},{w:"Ocean",h:"Deep"},{w:"Lake",h:"Calm"},{w:"Beach",h:"Sunny"},{w:"Jungle",h:"Wild"},{w:"Valley",h:"Low"},{w:"Hill",h:"Slope"},{w:"Waterfall",h:"Splash"},{w:"Volcano",h:"Hot"},{w:"Swamp",h:"Muddy"},{w:"Canyon",h:"Rocky"},{w:"Cliff",h:"Steep"},{w:"Meadow",h:"Grassy"},{w:"Pond",h:"Small"},{w:"Glacier",h:"Icy"},{w:"Prairie",h:"Flat"},{w:"Reef",h:"Underwater"},{w:"Bay",h:"Water"},{w:"Peninsula",h:"Water"},{w:"Plateau",h:"Flat"},{w:"Tundra",h:"Cold"},{w:"Rainforest",h:"Wet"},{w:"Oasis",h:"Water"},{w:"Marsh",h:"Wet"},{w:"Dune",h:"Sandy"},{w:"Stream",h:"Flowing"},{w:"Iceberg",h:"Cold"},{w:"Countryside",h:"Quiet"},{w:"Coast",h:"Water"},{w:"Harbor",h:"Water"},{w:"Farm",h:"Animals"},{w:"Town",h:"Homes"},{w:"Suburb",h:"Houses"},{w:"Wilderness",h:"Wild"},{w:"Savanna",h:"Grassy"},{w:"Fjord",h:"Water"},{w:"Lagoon",h:"Water"},{w:"Creek",h:"Water"},{w:"Pasture",h:"Grass"},{w:"Orchard",h:"Trees"},{w:"Vineyard",h:"Rows"},{w:"Ranch",h:"Animals"},{w:"Grove",h:"Trees"},{w:"Wetland",h:"Muddy"},{w:"Ridge",h:"Rocky"},{w:"Gorge",h:"Deep"},{w:"Springs",h:"Water"},{w:"Highlands",h:"Hilly"}],
-  "Sports": [{w:"Soccer",h:"Goal"},{w:"Basketball",h:"Ball"},{w:"Tennis",h:"Court"},{w:"Swimming",h:"Water"},{w:"Boxing",h:"Fighting"},{w:"Golf",h:"Grass"},{w:"Baseball",h:"Bat"},{w:"Cricket",h:"Field"},{w:"Volleyball",h:"Net"},{w:"Hockey",h:"Stick"},{w:"Rugby",h:"Rough"},{w:"Cycling",h:"Wheels"},{w:"Running",h:"Fast"},{w:"Skiing",h:"Snow"},{w:"Surfing",h:"Ocean"},{w:"Skateboarding",h:"Tricks"},{w:"Wrestling",h:"Grabbing"},{w:"Badminton",h:"Racket"},{w:"Bowling",h:"Rolling"},{w:"Archery",h:"Aiming"},{w:"Fencing",h:"Fighting"},{w:"Rowing",h:"Boat"},{w:"Diving",h:"Water"},{w:"Gymnastics",h:"Flips"},{w:"Karate",h:"Fighting"},{w:"Judo",h:"Grabbing"},{w:"Table Tennis",h:"Paddle"},{w:"Handball",h:"Throwing"},{w:"Sailing",h:"Wind"},{w:"Climbing",h:"Height"},{w:"Snowboarding",h:"Mountain"},{w:"Weightlifting",h:"Strong"},{w:"Marathon",h:"Long"},{w:"Polo",h:"Horses"},{w:"Softball",h:"Bat"},{w:"Squash",h:"Court"},{w:"Darts",h:"Aiming"},{w:"Billiards",h:"Table"},{w:"Ice Skating",h:"Cold"},{w:"Horse Racing",h:"Track"},{w:"Triathlon",h:"Racing"},{w:"Hiking",h:"Walking"},{w:"Kayaking",h:"Water"},{w:"Water Polo",h:"Pool"},{w:"Taekwondo",h:"Kicking"},{w:"Cheerleading",h:"Dancing"},{w:"Curling",h:"Ice"},{w:"Lacrosse",h:"Stick"},{w:"Motorsport",h:"Speed"},{w:"Dodgeball",h:"Ball"},{w:"Fishing",h:"Water"},{w:"Jogging",h:"Slow"},{w:"Ballet",h:"Dancing"},{w:"Yoga",h:"Stretching"},{w:"Parkour",h:"Jumping"}],
-  "Brands": [{w:"Nike",h:"Sporty"},{w:"Apple",h:"Gadget"},{w:"Coca Cola",h:"Fizzy"},{w:"McDonald's",h:"Tasty"},{w:"Google",h:"Online"},{w:"Adidas",h:"Sporty"},{w:"Amazon",h:"Shopping"},{w:"Samsung",h:"Screen"},{w:"Pepsi",h:"Bubbly"},{w:"Microsoft",h:"Computer"},{w:"Facebook",h:"Friends"},{w:"Netflix",h:"Movies"},{w:"Toyota",h:"Driving"},{w:"Disney",h:"Magic"},{w:"Sony",h:"Gadget"},{w:"BMW",h:"Wheels"},{w:"Starbucks",h:"Morning"},{w:"Instagram",h:"Photos"},{w:"YouTube",h:"Watch"},{w:"Ferrari",h:"Fast"},{w:"Gucci",h:"Fancy"},{w:"Chanel",h:"Fashion"},{w:"Rolex",h:"Fancy"},{w:"Mercedes",h:"Driving"},{w:"Tesla",h:"Modern"},{w:"Honda",h:"Driving"},{w:"Puma",h:"Sporty"},{w:"Reebok",h:"Sporty"},{w:"Lego",h:"Building"},{w:"Nintendo",h:"Games"},{w:"Xbox",h:"Gaming"},{w:"Spotify",h:"Music"},{w:"Twitter",h:"Online"},{w:"TikTok",h:"Trendy"},{w:"Nestle",h:"Snack"},{w:"Ikea",h:"Home"},{w:"Walmart",h:"Store"},{w:"Visa",h:"Money"},{w:"Mastercard",h:"Wallet"},{w:"PayPal",h:"Buying"},{w:"Intel",h:"Computer"},{w:"Canon",h:"Photos"},{w:"Nokia",h:"Gadget"},{w:"Audi",h:"Wheels"},{w:"Volkswagen",h:"Driving"},{w:"Ford",h:"Wheels"},{w:"Gillette",h:"Bathroom"},{w:"Colgate",h:"Fresh"},{w:"Heineken",h:"Party"},{w:"Lipton",h:"Drink"},{w:"Oreo",h:"Sweet"},{w:"Pringles",h:"Crunchy"},{w:"Dell",h:"Computer"},{w:"Uber",h:"Ride"},{w:"Red Bull",h:"Energy"}],
-  "Superpowers": [{w:"Flying",h:"Sky"},{w:"Invisibility",h:"Sneaky"},{w:"Super Strength",h:"Muscles"},{w:"Teleportation",h:"Instant"},{w:"Mind Reading",h:"Secrets"},{w:"Time Travel",h:"Past"},{w:"Super Speed",h:"Racing"},{w:"Telekinesis",h:"Move"},{w:"Healing",h:"Doctor"},{w:"Shapeshifting",h:"Change"},{w:"Fire Breathing",h:"Hot"},{w:"Ice Powers",h:"Cold"},{w:"X-Ray Vision",h:"Through"},{w:"Super Hearing",h:"Sounds"},{w:"Immortality",h:"Alive"},{w:"Levitation",h:"Float"},{w:"Elasticity",h:"Bendy"},{w:"Force Field",h:"Shield"},{w:"Lightning",h:"Storm"},{w:"Water Control",h:"Wet"},{w:"Wind Control",h:"Air"},{w:"Earth Control",h:"Ground"},{w:"Telepathy",h:"Thoughts"},{w:"Night Vision",h:"Dark"},{w:"Wall Crawling",h:"Climbing"},{w:"Super Jump",h:"Bouncy"},{w:"Invulnerability",h:"Tough"},{w:"Duplication",h:"Double"},{w:"Intangibility",h:"Ghostly"},{w:"Precognition",h:"Future"},{w:"Mind Control",h:"Command"},{w:"Energy Blast",h:"Power"},{w:"Laser Eyes",h:"Beam"},{w:"Super Smell",h:"Nose"},{w:"Regeneration",h:"Recover"},{w:"Camouflage",h:"Disguise"},{w:"Gravity Control",h:"Heavy"},{w:"Poison Touch",h:"Deadly"},{w:"Sonic Scream",h:"Loud"},{w:"Plant Control",h:"Green"},{w:"Animal Speech",h:"Wild"},{w:"Dream Walking",h:"Sleep"},{w:"Light Control",h:"Bright"},{w:"Shadow Control",h:"Gloomy"},{w:"Magnetism",h:"Metal"},{w:"Cloning",h:"Twin"},{w:"Super Memory",h:"Smart"},{w:"Underwater Breathing",h:"Ocean"},{w:"Heat Vision",h:"Warm"},{w:"Size Changing",h:"Big"},{w:"Web Slinging",h:"Swing"},{w:"Portal Making",h:"Travel"},{w:"Weather Control",h:"Clouds"},{w:"Super Reflexes",h:"Quick"},{w:"Astral Projection",h:"Spirit"}],
-  "Fears": [{w:"Spiders",h:"Creepy"},{w:"Heights",h:"Up"},{w:"Snakes",h:"Wild"},{w:"Darkness",h:"Night"},{w:"Clowns",h:"Funny"},{w:"Death",h:"Sad"},{w:"Needles",h:"Sharp"},{w:"Ghosts",h:"Spooky"},{w:"Public Speaking",h:"Stage"},{w:"Drowning",h:"Water"},{w:"Fire",h:"Hot"},{w:"Thunder",h:"Loud"},{w:"Lightning",h:"Bright"},{w:"Sharks",h:"Ocean"},{w:"Dogs",h:"Furry"},{w:"Bees",h:"Buzz"},{w:"Rats",h:"Small"},{w:"Insects",h:"Crawl"},{w:"Bats",h:"Cave"},{w:"Blood",h:"Red"},{w:"Falling",h:"Down"},{w:"Flying",h:"Sky"},{w:"Elevators",h:"Building"},{w:"Small Spaces",h:"Tight"},{w:"Crowds",h:"People"},{w:"Deep Water",h:"Ocean"},{w:"Storms",h:"Weather"},{w:"Earthquakes",h:"Ground"},{w:"Monsters",h:"Scary"},{w:"Nightmares",h:"Sleep"},{w:"Germs",h:"Dirty"},{w:"Doctors",h:"Hospital"},{w:"Dentists",h:"Checkup"},{w:"Failure",h:"Losing"},{w:"Rejection",h:"Hurt"},{w:"Loneliness",h:"Empty"},{w:"Being Lost",h:"Map"},{w:"Strangers",h:"New"},{w:"Wasps",h:"Sting"},{w:"War",h:"Fighting"},{w:"Bears",h:"Woods"},{w:"Wolves",h:"Woods"},{w:"Cockroaches",h:"Gross"},{w:"Aging",h:"Time"},{w:"Pain",h:"Ouch"},{w:"Illness",h:"Bed"},{w:"Bridges",h:"Road"},{w:"Tunnels",h:"Underground"},{w:"Roller Coasters",h:"Ride"},{w:"Escalators",h:"Steps"},{w:"Vomiting",h:"Stomach"},{w:"Choking",h:"Breath"},{w:"Tornadoes",h:"Wind"},{w:"Frogs",h:"Pond"},{w:"Volcanoes",h:"Mountain"}],
-  "Inventions": [{w:"Wheel",h:"Round"},{w:"Telephone",h:"Talk"},{w:"Light Bulb",h:"Bright"},{w:"Internet",h:"Connect"},{w:"Airplane",h:"Sky"},{w:"Car",h:"Drive"},{w:"Printing Press",h:"Books"},{w:"Computer",h:"Screen"},{w:"Television",h:"Watch"},{w:"Radio",h:"Sound"},{w:"Camera",h:"Picture"},{w:"Clock",h:"Time"},{w:"Compass",h:"Direction"},{w:"Paper",h:"Thin"},{w:"Battery",h:"Power"},{w:"Refrigerator",h:"Cold"},{w:"Microwave",h:"Heat"},{w:"Hammer",h:"Tool"},{w:"Bicycle",h:"Ride"},{w:"Train",h:"Travel"},{w:"Rocket",h:"Space"},{w:"Engine",h:"Machine"},{w:"Telescope",h:"Stars"},{w:"Microscope",h:"Tiny"},{w:"Vaccine",h:"Health"},{w:"Robot",h:"Metal"},{w:"Smartphone",h:"Pocket"},{w:"Toilet",h:"Bathroom"},{w:"Matches",h:"Fire"},{w:"Glasses",h:"Eyes"},{w:"Thermometer",h:"Fever"},{w:"Umbrella",h:"Rain"},{w:"Zipper",h:"Clothes"},{w:"Stapler",h:"Office"},{w:"Helicopter",h:"Fly"},{w:"Keyboard",h:"Type"},{w:"Mouse",h:"Click"},{w:"Printer",h:"Ink"},{w:"Toaster",h:"Kitchen"},{w:"Washing Machine",h:"Clean"},{w:"Vacuum",h:"Dust"},{w:"Air Conditioner",h:"Cool"},{w:"Fan",h:"Breeze"},{w:"Pencil",h:"Draw"},{w:"Pen",h:"Write"},{w:"Lock",h:"Safe"},{w:"Gun",h:"Danger"},{w:"Boat",h:"Float"},{w:"Submarine",h:"Deep"},{w:"Satellite",h:"Signal"},{w:"Guitar",h:"Music"},{w:"Piano",h:"Keys"},{w:"Traffic Light",h:"Street"},{w:"Ladder",h:"Climb"},{w:"Parachute",h:"Jump"}],
-  "School & Education": [{w:"Homework",h:"Tasks"},{w:"Teacher",h:"Adult"},{w:"Backpack",h:"Carry"},{w:"Pencil Case",h:"Holder"},{w:"Exam",h:"Tough"},{w:"Recess",h:"Outside"},{w:"Blackboard",h:"Wall"},{w:"Textbook",h:"Pages"},{w:"Ruler",h:"Plastic"},{w:"Eraser",h:"Fixing"},{w:"Notebook",h:"Paper"},{w:"Classroom",h:"Room"},{w:"Desk",h:"Furniture"},{w:"Chalk",h:"Dusty"},{w:"Principal",h:"Boss"},{w:"Student",h:"Kid"},{w:"Library",h:"Quiet"},{w:"Bell",h:"Loud"},{w:"Report Card",h:"Results"},{w:"Grades",h:"Ranking"},{w:"Lunchbox",h:"Food"},{w:"Cafeteria",h:"Eating"},{w:"Playground",h:"Fun"},{w:"Bus",h:"Riding"},{w:"Uniform",h:"Clothes"},{w:"Locker",h:"Storage"},{w:"Whiteboard",h:"Front"},{w:"Marker",h:"Colorful"},{w:"Glue",h:"Art"},{w:"Crayons",h:"Coloring"},{w:"Scissors",h:"Sharp"},{w:"Reading",h:"Books"},{w:"Writing",h:"Words"},{w:"Math",h:"Numbers"},{w:"Science",h:"Experiments"},{w:"History",h:"Old"},{w:"Spelling",h:"Letters"},{w:"Alphabet",h:"Order"},{w:"Quiz",h:"Questions"},{w:"Diploma",h:"Award"},{w:"Graduation",h:"Celebration"},{w:"Detention",h:"Trouble"},{w:"Field Trip",h:"Visiting"},{w:"Highlighter",h:"Bright"},{w:"Calculator",h:"Buttons"},{w:"Globe",h:"Round"},{w:"Map",h:"Places"},{w:"Yearbook",h:"Memories"},{w:"Assignment",h:"Work"},{w:"Lesson",h:"Learning"},{w:"Classmate",h:"Friend"},{w:"Essay",h:"Topic"},{w:"Gym",h:"Exercise"},{w:"Homeroom",h:"Morning"},{w:"Dictionary",h:"Thick"}]
+  "Food": [{w:"Pizza",h:"Slices"},{w:"Burger",h:"Grilled"},{w:"Hot Dog",h:"Ballpark"},{w:"Sandwich",h:"Lunch"},{w:"Pasta",h:"Italian"},{w:"Rice",h:"Sushi"},{w:"Bread",h:"Wheat"},{w:"Egg",h:"Breakfast"},{w:"Cheese",h:"Dairy"},{w:"Bacon",h:"Crispy"},{w:"Ham",h:"Pork"},{w:"Steak",h:"Beef"},{w:"Sausage",h:"Links"},{w:"Soup",h:"Bowl"},{w:"Salad",h:"Leafy"},{w:"Fries",h:"Ketchup"},{w:"Cake",h:"Birthday"},{w:"Cookie",h:"Crumbs"},{w:"Ice Cream",h:"Scoop"},{w:"Chocolate",h:"Melts"},{w:"Candy",h:"Halloween"},{w:"Donut",h:"Glazed"},{w:"Pancake",h:"Stack"},{w:"Waffle",h:"Squares"},{w:"Cereal",h:"Milk"},{w:"Apple",h:"Crunchy"},{w:"Banana",h:"Peel"},{w:"Orange",h:"Citrus"},{w:"Grape",h:"Bunch"},{w:"Strawberry",h:"Seeds"},{w:"Watermelon",h:"Summer"},{w:"Lemon",h:"Sour"},{w:"Peach",h:"Fuzzy"},{w:"Pineapple",h:"Tropical"},{w:"Cherry",h:"Pit"},{w:"Carrot",h:"Bunny"},{w:"Potato",h:"Mashed"},{w:"Tomato",h:"Sauce"},{w:"Corn",h:"Cob"},{w:"Onion",h:"Layers"},{w:"Broccoli",h:"Trees"},{w:"Peas",h:"Pod"},{w:"Popcorn",h:"Movie"},{w:"Chips",h:"Dip"},{w:"Pretzel",h:"Twisted"},{w:"Peanut",h:"Shell"},{w:"Honey",h:"Sticky"},{w:"Butter",h:"Spread"},{w:"Jam",h:"Berries"},{w:"Pie",h:"Crust"},{w:"Muffin",h:"Blueberry"},{w:"Meatball",h:"Spaghetti"},{w:"Taco",h:"Mexican"},{w:"Noodles",h:"Slurp"},{w:"Toast",h:"Buttered"}],
+  "Drinks": [{w:"Water",h:"Plain"},{w:"Milk",h:"Cow"},{w:"Coffee",h:"Morning"},{w:"Tea",h:"Leaves"},{w:"Juice",h:"Fruity"},{w:"Soda",h:"Fizzy"},{w:"Lemonade",h:"Sour"},{w:"Cola",h:"Caramel"},{w:"Milkshake",h:"Thick"},{w:"Smoothie",h:"Blended"},{w:"Orange Soda",h:"Citrus"},{w:"Beer",h:"Foamy"},{w:"Wine",h:"Grapes"},{w:"Champagne",h:"Celebrate"},{w:"Whiskey",h:"Barrel"},{w:"Vodka",h:"Clear"},{w:"Rum",h:"Pirate"},{w:"Cider",h:"Fall"},{w:"Iced Tea",h:"Summer"},{w:"Root Beer",h:"Float"},{w:"Orange Juice",h:"Breakfast"},{w:"Espresso",h:"Shot"},{w:"Latte",h:"Milky"},{w:"Cappuccino",h:"Frothy"},{w:"Slushie",h:"Icy"},{w:"Punch",h:"Party"},{w:"Coconut Water",h:"Beach"},{w:"Sparkling Water",h:"Bubbly"},{w:"Ginger Ale",h:"Spicy"},{w:"Sports Drink",h:"Workout"},{w:"Energy Drink",h:"Boost"},{w:"Apple Juice",h:"Orchard"},{w:"Grape Juice",h:"Purple"},{w:"Tomato Juice",h:"Red"},{w:"Herbal Tea",h:"Calm"},{w:"Green Tea",h:"Japan"},{w:"Black Coffee",h:"Bitter"},{w:"Hot Chocolate",h:"Winter"},{w:"Eggnog",h:"Christmas"},{w:"Kool Aid",h:"Powder"},{w:"Mocha",h:"Chocolate"},{w:"Chocolate Milk",h:"Brown"},{w:"Strawberry Milk",h:"Pink"},{w:"Iced Coffee",h:"Straw"},{w:"Margarita",h:"Lime"},{w:"Martini",h:"Shaken"},{w:"Tequila",h:"Mexico"},{w:"Gin",h:"Tonic"},{w:"Brandy",h:"Aged"},{w:"Sake",h:"Rice"},{w:"Mineral Water",h:"Spring"},{w:"Milk Tea",h:"Chewy"},{w:"Cranberry Juice",h:"Tart"},{w:"Pineapple Juice",h:"Spiky"},{w:"Frappe",h:"Frozen"}],
+  "Animals": [{w:"Dog",h:"Loyal"},{w:"Cat",h:"Whiskers"},{w:"Cow",h:"Milk"},{w:"Pig",h:"Mud"},{w:"Horse",h:"Gallop"},{w:"Sheep",h:"Wool"},{w:"Goat",h:"Climbing"},{w:"Chicken",h:"Eggs"},{w:"Duck",h:"Waddle"},{w:"Rabbit",h:"Hopping"},{w:"Mouse",h:"Squeak"},{w:"Rat",h:"Sewer"},{w:"Lion",h:"Mane"},{w:"Tiger",h:"Orange"},{w:"Bear",h:"Honey"},{w:"Elephant",h:"Tusks"},{w:"Giraffe",h:"Spots"},{w:"Zebra",h:"Stripes"},{w:"Monkey",h:"Banana"},{w:"Gorilla",h:"Strong"},{w:"Kangaroo",h:"Pouch"},{w:"Panda",h:"Bamboo"},{w:"Fox",h:"Sly"},{w:"Wolf",h:"Howl"},{w:"Deer",h:"Antlers"},{w:"Squirrel",h:"Acorns"},{w:"Frog",h:"Pond"},{w:"Snake",h:"Hiss"},{w:"Turtle",h:"Slow"},{w:"Lizard",h:"Scaly"},{w:"Fish",h:"Fins"},{w:"Shark",h:"Teeth"},{w:"Whale",h:"Biggest"},{w:"Dolphin",h:"Smart"},{w:"Octopus",h:"Tentacles"},{w:"Crab",h:"Claws"},{w:"Bird",h:"Chirp"},{w:"Owl",h:"Night"},{w:"Eagle",h:"Soaring"},{w:"Penguin",h:"Ice"},{w:"Parrot",h:"Talking"},{w:"Bee",h:"Buzz"},{w:"Ant",h:"Colony"},{w:"Spider",h:"Eight legs"},{w:"Butterfly",h:"Caterpillar"},{w:"Ladybug",h:"Red"},{w:"Bat",h:"Cave"},{w:"Camel",h:"Desert"},{w:"Hippo",h:"River"},{w:"Rhino",h:"Horn"},{w:"Crocodile",h:"Swamp"},{w:"Turkey",h:"Fan tail"},{w:"Donkey",h:"Stubborn"},{w:"Hamster",h:"Wheel"},{w:"Peacock",h:"Colorful"}],
+  "Countries": [{w:"France",h:"Wine"},{w:"Germany",h:"Beer"},{w:"Italy",h:"Pasta"},{w:"Spain",h:"Bulls"},{w:"England",h:"Tea"},{w:"Ireland",h:"Green"},{w:"Portugal",h:"Sailors"},{w:"Greece",h:"Ancient"},{w:"Switzerland",h:"Watches"},{w:"Netherlands",h:"Tulips"},{w:"Belgium",h:"Waffles"},{w:"Sweden",h:"Meatballs"},{w:"Norway",h:"Vikings"},{w:"Denmark",h:"Pastry"},{w:"Finland",h:"Sauna"},{w:"Poland",h:"Sausage"},{w:"Russia",h:"Vodka"},{w:"Turkey",h:"Kebab"},{w:"Ukraine",h:"Wheat"},{w:"Austria",h:"Skiing"},{w:"United States",h:"Burgers"},{w:"Canada",h:"Hockey"},{w:"Mexico",h:"Tacos"},{w:"Brazil",h:"Carnival"},{w:"Argentina",h:"Tango"},{w:"Chile",h:"Mountains"},{w:"Colombia",h:"Coffee"},{w:"Peru",h:"Llamas"},{w:"Cuba",h:"Cigars"},{w:"Jamaica",h:"Reggae"},{w:"China",h:"Pandas"},{w:"Japan",h:"Sushi"},{w:"India",h:"Curry"},{w:"South Korea",h:"Kimchi"},{w:"Thailand",h:"Elephants"},{w:"Vietnam",h:"Noodles"},{w:"Indonesia",h:"Orangutans"},{w:"Philippines",h:"Boxing"},{w:"Malaysia",h:"Towers"},{w:"Singapore",h:"Tiny"},{w:"Pakistan",h:"Cricket"},{w:"Iran",h:"Carpets"},{w:"Iraq",h:"Oil"},{w:"Israel",h:"Holy"},{w:"Saudi Arabia",h:"Camels"},{w:"Egypt",h:"Mummies"},{w:"Morocco",h:"Markets"},{w:"Nigeria",h:"Drums"},{w:"Kenya",h:"Safari"},{w:"South Africa",h:"Diamonds"},{w:"Australia",h:"Kangaroo"},{w:"New Zealand",h:"Sheep"},{w:"Iceland",h:"Volcanoes"},{w:"Cambodia",h:"Temples"},{w:"Ghana",h:"Gold"}],
+  "Furniture": [{w:"Chair",h:"Backrest"},{w:"Table",h:"Flat"},{w:"Bed",h:"Blankets"},{w:"Sofa",h:"Movie night"},{w:"Couch",h:"Lounging"},{w:"Desk",h:"Homework"},{w:"Stool",h:"Round"},{w:"Bench",h:"Park"},{w:"Bookshelf",h:"Library"},{w:"Wardrobe",h:"Hanging"},{w:"Dresser",h:"Socks"},{w:"Cabinet",h:"Doors"},{w:"Cupboard",h:"Snacks"},{w:"Drawer",h:"Sliding"},{w:"Nightstand",h:"Alarm clock"},{w:"Coffee Table",h:"Low"},{w:"Dining Table",h:"Family meal"},{w:"Armchair",h:"Cozy"},{w:"Recliner",h:"Leans"},{w:"Rocking Chair",h:"Grandma"},{w:"Bunk Bed",h:"Ladder"},{w:"Crib",h:"Baby"},{w:"Mattress",h:"Springs"},{w:"Pillow",h:"Fluffy"},{w:"Lamp",h:"Bulb"},{w:"Mirror",h:"Reflection"},{w:"Rug",h:"Floor"},{w:"Curtain",h:"Window"},{w:"Shelf",h:"Trophies"},{w:"Closet",h:"Clothes"},{w:"Wall Clock",h:"Ticking"},{w:"Footstool",h:"Legs up"},{w:"Bar Stool",h:"Tall"},{w:"Ottoman",h:"Padded"},{w:"Chandelier",h:"Ceiling"},{w:"Fireplace",h:"Logs"},{w:"Television",h:"Cartoons"},{w:"Bathtub",h:"Bubbles"},{w:"Sink",h:"Faucet"},{w:"Toilet",h:"Flush"},{w:"Refrigerator",h:"Cold"},{w:"Oven",h:"Baking"},{w:"Stove",h:"Burner"},{w:"Microwave",h:"Reheat"},{w:"Dishwasher",h:"Plates"},{w:"Washing Machine",h:"Laundry"},{w:"Bookcase",h:"Novels"},{w:"Vanity",h:"Makeup"},{w:"Hammock",h:"Swinging"},{w:"High Chair",h:"Feeding"},{w:"Wall Shelf",h:"Floating"},{w:"Sideboard",h:"Dishes"},{w:"Loveseat",h:"Couple"},{w:"Chest",h:"Treasure"},{w:"Cushion",h:"Squishy"}],
+  "Times & Weather": [{w:"Morning",h:"Early"},{w:"Noon",h:"Twelve"},{w:"Afternoon",h:"Nap"},{w:"Evening",h:"Dinner"},{w:"Night",h:"Dark"},{w:"Midnight",h:"Late"},{w:"Midday",h:"Lunch"},{w:"Dawn",h:"Rooster"},{w:"Dusk",h:"Dim"},{w:"Sunrise",h:"Golden"},{w:"Sunset",h:"Orange"},{w:"Lunchtime",h:"Sandwich"},{w:"Bedtime",h:"Pajamas"},{w:"Breakfast",h:"Cereal"},{w:"Dinnertime",h:"Roast"},{w:"Spring",h:"Blossom"},{w:"Summer",h:"Beach"},{w:"Autumn",h:"Leaves"},{w:"Winter",h:"Sledding"},{w:"January",h:"Freezing"},{w:"February",h:"Chilly"},{w:"March",h:"Melting"},{w:"April",h:"Puddles"},{w:"May",h:"Blooming"},{w:"June",h:"Weddings"},{w:"July",h:"Fireworks"},{w:"August",h:"Vacation"},{w:"September",h:"School"},{w:"October",h:"Pumpkins"},{w:"November",h:"Turkey"},{w:"December",h:"Presents"},{w:"Rain",h:"Umbrella"},{w:"Snow",h:"White"},{w:"Sunny",h:"Bright"},{w:"Cloudy",h:"Grey"},{w:"Windy",h:"Kite"},{w:"Storm",h:"Wild"},{w:"Thunder",h:"Loud"},{w:"Lightning",h:"Flash"},{w:"Fog",h:"Blurry"},{w:"Hail",h:"Bouncing"},{w:"Rainbow",h:"Arch"},{w:"Breeze",h:"Gentle"},{w:"Frost",h:"Icy"},{w:"Heatwave",h:"Sweaty"},{w:"Drizzle",h:"Damp"},{w:"Hot",h:"Burning"},{w:"Cold",h:"Shivering"},{w:"Warm",h:"Cozy"},{w:"Cool",h:"Fresh"},{w:"Weekend",h:"Relaxing"},{w:"Weekday",h:"Working"},{w:"Sunshine",h:"Rays"},{w:"Overcast",h:"Gloomy"},{w:"Humid",h:"Sticky"}],
+  "Places": [{w:"Beach",h:"Sandy"},{w:"Park",h:"Picnic"},{w:"School",h:"Classes"},{w:"Hospital",h:"Doctors"},{w:"Airport",h:"Luggage"},{w:"Zoo",h:"Cages"},{w:"Gym",h:"Workout"},{w:"Restaurant",h:"Waiter"},{w:"Library",h:"Quiet"},{w:"Museum",h:"Exhibits"},{w:"Bank",h:"Savings"},{w:"Church",h:"Prayer"},{w:"Farm",h:"Crops"},{w:"Hotel",h:"Rooms"},{w:"Cinema",h:"Popcorn"},{w:"Supermarket",h:"Cart"},{w:"Pool",h:"Diving"},{w:"Playground",h:"Swings"},{w:"Office",h:"Desks"},{w:"Station",h:"Platform"},{w:"Bakery",h:"Bread"},{w:"Forest",h:"Trees"},{w:"Mountain",h:"Climbing"},{w:"Cafe",h:"Coffee"},{w:"Stadium",h:"Cheering"},{w:"Bridge",h:"Crossing"},{w:"Castle",h:"Knights"},{w:"Prison",h:"Bars"},{w:"Garden",h:"Flowers"},{w:"Kitchen",h:"Cooking"},{w:"Bedroom",h:"Pillow"},{w:"Bathroom",h:"Shower"},{w:"Garage",h:"Cars"},{w:"Mall",h:"Stores"},{w:"Pharmacy",h:"Medicine"},{w:"Post Office",h:"Stamps"},{w:"Fire Station",h:"Trucks"},{w:"Bus Stop",h:"Waiting"},{w:"Theater",h:"Stage"},{w:"Circus",h:"Clowns"},{w:"Desert",h:"Dry"},{w:"Island",h:"Tropical"},{w:"River",h:"Flowing"},{w:"Lake",h:"Fishing"},{w:"Cave",h:"Dark"},{w:"Waterfall",h:"Splashing"},{w:"Harbor",h:"Boats"},{w:"Lighthouse",h:"Ships"},{w:"Barn",h:"Hay"},{w:"Factory",h:"Machines"},{w:"Camp",h:"Tents"},{w:"Amusement Park",h:"Rides"},{w:"Aquarium",h:"Tanks"},{w:"Salon",h:"Haircut"},{w:"Dentist",h:"Drill"}],
+  "Tools & Instruments": [{w:"Hammer",h:"Pounding"},{w:"Screwdriver",h:"Twist"},{w:"Saw",h:"Cutting"},{w:"Drill",h:"Holes"},{w:"Wrench",h:"Bolts"},{w:"Pliers",h:"Gripping"},{w:"Axe",h:"Chopping"},{w:"Shovel",h:"Digging"},{w:"Rake",h:"Leaves"},{w:"Nail",h:"Pointy"},{w:"Tape Measure",h:"Inches"},{w:"Level",h:"Straight"},{w:"Chisel",h:"Carving"},{w:"File",h:"Smoothing"},{w:"Sandpaper",h:"Rough"},{w:"Ladder",h:"Climbing"},{w:"Scissors",h:"Snip"},{w:"Knife",h:"Slicing"},{w:"Paintbrush",h:"Colors"},{w:"Broom",h:"Sweeping"},{w:"Wheelbarrow",h:"Hauling"},{w:"Clamp",h:"Holding"},{w:"Screw",h:"Spiral"},{w:"Toolbox",h:"Storage"},{w:"Crowbar",h:"Prying"},{w:"Stapler",h:"Office"},{w:"Mallet",h:"Rubber"},{w:"Pickaxe",h:"Mining"},{w:"Guitar",h:"Strumming"},{w:"Piano",h:"Keys"},{w:"Drums",h:"Beat"},{w:"Violin",h:"Bow"},{w:"Flute",h:"Silver"},{w:"Trumpet",h:"Fanfare"},{w:"Saxophone",h:"Jazz"},{w:"Harmonica",h:"Pocket"},{w:"Banjo",h:"Country"},{w:"Cello",h:"Seated"},{w:"Harp",h:"Plucking"},{w:"Trombone",h:"Brass"},{w:"Tuba",h:"Deep"},{w:"Clarinet",h:"Black"},{w:"Xylophone",h:"Bars"},{w:"Tambourine",h:"Jingle"},{w:"Accordion",h:"Squeeze"},{w:"Bagpipes",h:"Scottish"},{w:"Triangle",h:"Ding"},{w:"Cymbals",h:"Crash"},{w:"Bongos",h:"Hands"},{w:"Recorder",h:"School"},{w:"Maracas",h:"Shaking"},{w:"Organ",h:"Church"},{w:"Ukulele",h:"Hawaii"},{w:"Whistle",h:"Referee"},{w:"Gong",h:"Boom"}],
+  "Christmas": [{w:"Santa",h:"Jolly"},{w:"Reindeer",h:"Antlers"},{w:"Tree",h:"Pine"},{w:"Snowman",h:"Melts"},{w:"Presents",h:"Wrapped"},{w:"Stocking",h:"Hung"},{w:"Elf",h:"Helper"},{w:"Sleigh",h:"Ride"},{w:"Ornament",h:"Shiny"},{w:"Tinsel",h:"Sparkly"},{w:"Wreath",h:"Door"},{w:"Mistletoe",h:"White berries"},{w:"Candy Cane",h:"Striped"},{w:"Gingerbread",h:"Spicy"},{w:"Carol",h:"Singing"},{w:"Bells",h:"Ring"},{w:"Star",h:"Twinkle"},{w:"Chimney",h:"Rooftop"},{w:"Fireplace",h:"Cozy"},{w:"Snowflake",h:"Unique"},{w:"Holly",h:"Berries"},{w:"Candle",h:"Flame"},{w:"Nutcracker",h:"Soldier"},{w:"Angel",h:"Wings"},{w:"Nativity",h:"Stable"},{w:"Fruitcake",h:"Heavy"},{w:"Eggnog",h:"Creamy"},{w:"Wrapping Paper",h:"Covers"},{w:"Ribbon",h:"Ties"},{w:"Bow",h:"Knot"},{w:"Turkey",h:"Roast"},{w:"Sled",h:"Hill"},{w:"Icicle",h:"Pointy"},{w:"Frost",h:"Windows"},{w:"Snowball",h:"Throw"},{w:"Chestnuts",h:"Roasted"},{w:"Poinsettia",h:"Red plant"},{w:"Cookies",h:"Baked"},{w:"Garland",h:"Draped"},{w:"Lights",h:"Glowing"},{w:"Snow",h:"White"},{w:"Sweater",h:"Knitted"},{w:"Scarf",h:"Neck"},{w:"Mittens",h:"Hands"},{w:"Wish List",h:"Wants"},{w:"North Pole",h:"Arctic"},{w:"Workshop",h:"Tools"},{w:"Snow Globe",h:"Shake"},{w:"Pudding",h:"Steamed"},{w:"Cracker",h:"Pop"},{w:"Hot Chocolate",h:"Marshmallows"},{w:"Candy",h:"Sugar"},{w:"Rudolph",h:"Leader"},{w:"Toys",h:"Play"},{w:"Peppermint",h:"Minty"}],
+  "Holidays": [{w:"Halloween",h:"Costumes"},{w:"Easter",h:"Spring"},{w:"Thanksgiving",h:"Pilgrims"},{w:"New Year",h:"Countdown"},{w:"Birthday",h:"Cake"},{w:"Valentine's Day",h:"Love"},{w:"Independence Day",h:"Freedom"},{w:"Mother's Day",h:"Flowers"},{w:"Father's Day",h:"Grilling"},{w:"April Fools",h:"Tricks"},{w:"Labor Day",h:"September"},{w:"Memorial Day",h:"Soldiers"},{w:"Anniversary",h:"Marriage"},{w:"Wedding",h:"Groom"},{w:"Graduation",h:"Gown"},{w:"Baby Shower",h:"Diapers"},{w:"Retirement",h:"Senior"},{w:"Hanukkah",h:"Candles"},{w:"Ramadan",h:"Fasting"},{w:"Diwali",h:"Lanterns"},{w:"Carnival",h:"Masks"},{w:"Mardi Gras",h:"Beads"},{w:"St Patrick's Day",h:"Green"},{w:"Cinco de Mayo",h:"Sombrero"},{w:"Earth Day",h:"Recycle"},{w:"Election Day",h:"November"},{w:"Groundhog Day",h:"Shadow"},{w:"Veterans Day",h:"Military"},{w:"Columbus Day",h:"Explorer"},{w:"Sweetest Day",h:"Candy"},{w:"Boxing Day",h:"Shopping"},{w:"Chinese New Year",h:"Dragon"},{w:"Passover",h:"Egypt"},{w:"Kwanzaa",h:"Seven"},{w:"Oktoberfest",h:"Beer"},{w:"Prom",h:"Dance"},{w:"Homecoming",h:"Football"},{w:"Quinceanera",h:"Fifteen"},{w:"Bar Mitzvah",h:"Thirteen"},{w:"Reunion",h:"Family"},{w:"Housewarming",h:"Moving"},{w:"Bridal Shower",h:"Bride"},{w:"Engagement",h:"Ring"},{w:"Christening",h:"Baby"},{w:"New Year's Eve",h:"Midnight"},{w:"Field Day",h:"Races"},{w:"Spring Break",h:"Beach"},{w:"Summer Vacation",h:"Sunshine"},{w:"Presidents Day",h:"February"},{w:"Flag Day",h:"Stripes"},{w:"May Day",h:"Ribbons"},{w:"Harvest Festival",h:"Autumn"},{w:"Feast Day",h:"Saint"},{w:"Parade",h:"Floats"},{w:"Festival",h:"Music"}],
+  "Objects": [{w:"Umbrella",h:"Rainy"},{w:"Keys",h:"Unlock"},{w:"Phone",h:"Texting"},{w:"Pillow",h:"Sleep"},{w:"Mirror",h:"Grooming"},{w:"Clock",h:"Ticking"},{w:"Candle",h:"Wax"},{w:"Backpack",h:"School"},{w:"Wallet",h:"Cash"},{w:"Glasses",h:"Vision"},{w:"Watch",h:"Wrist"},{w:"Toothbrush",h:"Bristles"},{w:"Comb",h:"Hair"},{w:"Cup",h:"Sip"},{w:"Plate",h:"Dinner"},{w:"Spoon",h:"Soup"},{w:"Fork",h:"Poke"},{w:"Knife",h:"Cutting"},{w:"Bottle",h:"Water"},{w:"Book",h:"Reading"},{w:"Pencil",h:"Sketch"},{w:"Pen",h:"Ink"},{w:"Scissors",h:"Snip"},{w:"Soap",h:"Bubbles"},{w:"Towel",h:"Drying"},{w:"Blanket",h:"Cozy"},{w:"Basket",h:"Picnic"},{w:"Broom",h:"Chores"},{w:"Bucket",h:"Mopping"},{w:"Camera",h:"Photos"},{w:"Remote",h:"TV"},{w:"Flashlight",h:"Beam"},{w:"Battery",h:"Power"},{w:"Rope",h:"Knots"},{w:"Balloon",h:"Party"},{w:"Ball",h:"Bounce"},{w:"Ring",h:"Finger"},{w:"Necklace",h:"Jewelry"},{w:"Hat",h:"Head"},{w:"Shoe",h:"Foot"},{w:"Sock",h:"Toes"},{w:"Belt",h:"Waist"},{w:"Button",h:"Shirt"},{w:"Napkin",h:"Wipe"},{w:"Straw",h:"Slurp"},{w:"Envelope",h:"Letter"},{w:"Stamp",h:"Mail"},{w:"Magnet",h:"Metal"},{w:"Whistle",h:"Blowing"},{w:"Kite",h:"Windy"},{w:"Jar",h:"Lid"},{w:"Bell",h:"Ringing"},{w:"Fan",h:"Breeze"},{w:"Lamp",h:"Glow"},{w:"Purse",h:"Coins"}],
+  "Locations": [{w:"Desert",h:"Dry"},{w:"Mountain",h:"Climbing"},{w:"Island",h:"Tropical"},{w:"Forest",h:"Camping"},{w:"River",h:"Flowing"},{w:"City",h:"Skyscrapers"},{w:"Village",h:"Small"},{w:"Cave",h:"Dark"},{w:"Ocean",h:"Salty"},{w:"Lake",h:"Calm"},{w:"Beach",h:"Sandy"},{w:"Jungle",h:"Monkeys"},{w:"Valley",h:"Low"},{w:"Hill",h:"Slope"},{w:"Waterfall",h:"Splashing"},{w:"Volcano",h:"Smoke"},{w:"Swamp",h:"Muddy"},{w:"Canyon",h:"Deep"},{w:"Cliff",h:"Edge"},{w:"Meadow",h:"Grassy"},{w:"Pond",h:"Ducks"},{w:"Glacier",h:"Frozen"},{w:"Prairie",h:"Bison"},{w:"Reef",h:"Snorkeling"},{w:"Bay",h:"Curved"},{w:"Peninsula",h:"Surrounded"},{w:"Plateau",h:"Flat top"},{w:"Tundra",h:"Snowy"},{w:"Rainforest",h:"Parrots"},{w:"Oasis",h:"Palms"},{w:"Marsh",h:"Soggy"},{w:"Dune",h:"Sand"},{w:"Stream",h:"Trickle"},{w:"Iceberg",h:"Floating"},{w:"Countryside",h:"Fields"},{w:"Coast",h:"Lighthouse"},{w:"Harbor",h:"Boats"},{w:"Farm",h:"Crops"},{w:"Town",h:"Shops"},{w:"Suburb",h:"Houses"},{w:"Wilderness",h:"Remote"},{w:"Savanna",h:"Safari"},{w:"Fjord",h:"Narrow water"},{w:"Lagoon",h:"Turquoise"},{w:"Creek",h:"Shallow"},{w:"Pasture",h:"Grazing"},{w:"Orchard",h:"Apples"},{w:"Vineyard",h:"Wine"},{w:"Ranch",h:"Cowboys"},{w:"Grove",h:"Shady"},{w:"Wetland",h:"Boggy"},{w:"Ridge",h:"Narrow top"},{w:"Gorge",h:"Steep"},{w:"Springs",h:"Warm water"},{w:"Highlands",h:"Rocky"}],
+  "Sports": [{w:"Soccer",h:"Kicking"},{w:"Basketball",h:"Dribbling"},{w:"Tennis",h:"Court"},{w:"Swimming",h:"Pool"},{w:"Boxing",h:"Punching"},{w:"Golf",h:"Clubs"},{w:"Baseball",h:"Diamond"},{w:"Cricket",h:"Bat"},{w:"Volleyball",h:"Net"},{w:"Hockey",h:"Puck"},{w:"Rugby",h:"Tackle"},{w:"Cycling",h:"Pedals"},{w:"Running",h:"Track"},{w:"Skiing",h:"Snow"},{w:"Surfing",h:"Waves"},{w:"Skateboarding",h:"Tricks"},{w:"Wrestling",h:"Pinning"},{w:"Badminton",h:"Racket"},{w:"Bowling",h:"Pins"},{w:"Archery",h:"Bow"},{w:"Fencing",h:"Swords"},{w:"Rowing",h:"Oars"},{w:"Diving",h:"Splash"},{w:"Gymnastics",h:"Flips"},{w:"Karate",h:"Chop"},{w:"Judo",h:"Throws"},{w:"Table Tennis",h:"Paddle"},{w:"Handball",h:"Goals"},{w:"Sailing",h:"Wind"},{w:"Climbing",h:"Heights"},{w:"Snowboarding",h:"Board"},{w:"Weightlifting",h:"Barbell"},{w:"Marathon",h:"Distance"},{w:"Polo",h:"Horses"},{w:"Softball",h:"Underarm"},{w:"Squash",h:"Wall"},{w:"Darts",h:"Bullseye"},{w:"Billiards",h:"Cue"},{w:"Ice Skating",h:"Rink"},{w:"Horse Racing",h:"Betting"},{w:"Triathlon",h:"Three"},{w:"Hiking",h:"Trails"},{w:"Kayaking",h:"Paddle"},{w:"Water Polo",h:"Pool"},{w:"Taekwondo",h:"Kicks"},{w:"Cheerleading",h:"Chants"},{w:"Curling",h:"Sweeping"},{w:"Lacrosse",h:"Sticks"},{w:"Motorsport",h:"Cars"},{w:"Dodgeball",h:"Throwing"},{w:"Fishing",h:"Bait"},{w:"Jogging",h:"Slow"},{w:"Ballet",h:"Tiptoes"},{w:"Yoga",h:"Stretching"},{w:"Parkour",h:"Rooftops"}],
+  "Brands": [{w:"Nike",h:"Sneakers"},{w:"Apple",h:"Phones"},{w:"Coca Cola",h:"Fizzy"},{w:"McDonald's",h:"Burgers"},{w:"Google",h:"Answers"},{w:"Adidas",h:"Sneakers"},{w:"Amazon",h:"Packages"},{w:"Samsung",h:"Phones"},{w:"Pepsi",h:"Soda"},{w:"Microsoft",h:"Software"},{w:"Facebook",h:"Friends"},{w:"Netflix",h:"Movies"},{w:"Toyota",h:"Reliable"},{w:"Disney",h:"Cartoons"},{w:"Sony",h:"TVs"},{w:"BMW",h:"Luxury"},{w:"Starbucks",h:"Coffee"},{w:"Instagram",h:"Photos"},{w:"YouTube",h:"Videos"},{w:"Ferrari",h:"Racing"},{w:"Gucci",h:"Handbags"},{w:"Chanel",h:"Perfume"},{w:"Rolex",h:"Watches"},{w:"Mercedes",h:"Fancy"},{w:"Tesla",h:"Electric"},{w:"Honda",h:"Motorbikes"},{w:"Puma",h:"Sneakers"},{w:"Reebok",h:"Sneakers"},{w:"Lego",h:"Blocks"},{w:"Nintendo",h:"Games"},{w:"Xbox",h:"Console"},{w:"Spotify",h:"Music"},{w:"Twitter",h:"Posts"},{w:"TikTok",h:"Dancing"},{w:"Nestle",h:"Chocolate"},{w:"Ikea",h:"Furniture"},{w:"Walmart",h:"Groceries"},{w:"Visa",h:"Cards"},{w:"Mastercard",h:"Cards"},{w:"PayPal",h:"Payments"},{w:"Intel",h:"Computers"},{w:"Canon",h:"Cameras"},{w:"Nokia",h:"Phones"},{w:"Audi",h:"German"},{w:"Volkswagen",h:"German"},{w:"Ford",h:"Trucks"},{w:"Gillette",h:"Shaving"},{w:"Colgate",h:"Teeth"},{w:"Heineken",h:"Beer"},{w:"Lipton",h:"Tea"},{w:"Oreo",h:"Cookies"},{w:"Pringles",h:"Chips"},{w:"Dell",h:"Laptops"},{w:"Uber",h:"Taxi"},{w:"Red Bull",h:"Energy"}],
+  "Superpowers": [{w:"Flying",h:"Sky"},{w:"Invisibility",h:"Hidden"},{w:"Super Strength",h:"Muscles"},{w:"Teleportation",h:"Instant"},{w:"Mind Reading",h:"Thoughts"},{w:"Time Travel",h:"Clock"},{w:"Super Speed",h:"Running"},{w:"Telekinesis",h:"Objects"},{w:"Healing",h:"Bandage"},{w:"Shapeshifting",h:"Disguise"},{w:"Fire Breathing",h:"Dragon"},{w:"Ice Powers",h:"Snowman"},{w:"X-Ray Vision",h:"Bones"},{w:"Super Hearing",h:"Ears"},{w:"Immortality",h:"Forever"},{w:"Levitation",h:"Balloon"},{w:"Elasticity",h:"Rubber"},{w:"Force Field",h:"Bubble"},{w:"Lightning",h:"Thunder"},{w:"Water Control",h:"Waves"},{w:"Wind Control",h:"Kite"},{w:"Earth Control",h:"Rocks"},{w:"Telepathy",h:"Messages"},{w:"Night Vision",h:"Owl"},{w:"Wall Crawling",h:"Sticky"},{w:"Super Jump",h:"Kangaroo"},{w:"Invulnerability",h:"Bulletproof"},{w:"Duplication",h:"Mirror"},{w:"Intangibility",h:"Ghost"},{w:"Precognition",h:"Future"},{w:"Mind Control",h:"Puppet"},{w:"Energy Blast",h:"Zap"},{w:"Laser Eyes",h:"Beams"},{w:"Super Smell",h:"Nose"},{w:"Regeneration",h:"Starfish"},{w:"Camouflage",h:"Chameleon"},{w:"Gravity Control",h:"Weight"},{w:"Poison Touch",h:"Snake"},{w:"Sonic Scream",h:"Loud"},{w:"Plant Control",h:"Vines"},{w:"Animal Speech",h:"Pets"},{w:"Dream Walking",h:"Sleep"},{w:"Light Control",h:"Bright"},{w:"Shadow Control",h:"Dark"},{w:"Magnetism",h:"Metal"},{w:"Cloning",h:"Twins"},{w:"Super Memory",h:"Facts"},{w:"Underwater Breathing",h:"Gills"},{w:"Heat Vision",h:"Burning"},{w:"Size Changing",h:"Shrinking"},{w:"Web Slinging",h:"Swinging"},{w:"Portal Making",h:"Doorway"},{w:"Weather Control",h:"Storm"},{w:"Super Reflexes",h:"Dodging"},{w:"Astral Projection",h:"Soul"}],
+  "Fears": [{w:"Spiders",h:"Eight legs"},{w:"Heights",h:"Cliff"},{w:"Snakes",h:"Slithery"},{w:"Darkness",h:"Night"},{w:"Clowns",h:"Circus"},{w:"Death",h:"Funeral"},{w:"Needles",h:"Pointy"},{w:"Ghosts",h:"Haunted"},{w:"Public Speaking",h:"Stage"},{w:"Drowning",h:"Underwater"},{w:"Fire",h:"Smoke"},{w:"Thunder",h:"Boom"},{w:"Lightning",h:"Flash"},{w:"Sharks",h:"Fin"},{w:"Dogs",h:"Leash"},{w:"Bees",h:"Honey"},{w:"Rats",h:"Sewer"},{w:"Insects",h:"Six legs"},{w:"Bats",h:"Cave"},{w:"Blood",h:"Cut"},{w:"Falling",h:"Trip"},{w:"Flying",h:"Wings"},{w:"Elevators",h:"Button"},{w:"Small Spaces",h:"Closet"},{w:"Crowds",h:"Concert"},{w:"Deep Water",h:"Diving"},{w:"Storms",h:"Rain"},{w:"Earthquakes",h:"Rumble"},{w:"Monsters",h:"Under bed"},{w:"Nightmares",h:"Sleep"},{w:"Germs",h:"Wash"},{w:"Doctors",h:"Checkup"},{w:"Dentists",h:"Drill"},{w:"Failure",h:"Mistake"},{w:"Rejection",h:"Left out"},{w:"Loneliness",h:"No friends"},{w:"Being Lost",h:"Wandering"},{w:"Strangers",h:"New face"},{w:"Wasps",h:"Nest"},{w:"War",h:"Soldiers"},{w:"Bears",h:"Woods"},{w:"Wolves",h:"Pack"},{w:"Cockroaches",h:"Kitchen"},{w:"Aging",h:"Wrinkles"},{w:"Pain",h:"Ouch"},{w:"Illness",h:"Fever"},{w:"Bridges",h:"Crossing"},{w:"Tunnels",h:"Subway"},{w:"Roller Coasters",h:"Loop"},{w:"Escalators",h:"Mall"},{w:"Vomiting",h:"Stomach"},{w:"Choking",h:"Throat"},{w:"Tornadoes",h:"Spinning"},{w:"Frogs",h:"Pond"},{w:"Volcanoes",h:"Ash"}],
+  "Inventions": [{w:"Wheel",h:"Rolling"},{w:"Telephone",h:"Ringing"},{w:"Light Bulb",h:"Bright"},{w:"Internet",h:"Websites"},{w:"Airplane",h:"Flying"},{w:"Car",h:"Driving"},{w:"Printing Press",h:"Books"},{w:"Computer",h:"Screen"},{w:"Television",h:"Shows"},{w:"Radio",h:"Listening"},{w:"Camera",h:"Photos"},{w:"Clock",h:"Ticking"},{w:"Compass",h:"North"},{w:"Paper",h:"Thin"},{w:"Battery",h:"Charge"},{w:"Refrigerator",h:"Cold"},{w:"Microwave",h:"Reheat"},{w:"Hammer",h:"Nails"},{w:"Bicycle",h:"Pedals"},{w:"Train",h:"Rails"},{w:"Rocket",h:"Space"},{w:"Engine",h:"Fuel"},{w:"Telescope",h:"Stars"},{w:"Microscope",h:"Tiny"},{w:"Vaccine",h:"Shot"},{w:"Robot",h:"Beeping"},{w:"Smartphone",h:"Apps"},{w:"Toilet",h:"Flush"},{w:"Matches",h:"Fire"},{w:"Glasses",h:"Seeing"},{w:"Thermometer",h:"Fever"},{w:"Umbrella",h:"Rain"},{w:"Zipper",h:"Jacket"},{w:"Stapler",h:"Papers"},{w:"Helicopter",h:"Hovering"},{w:"Keyboard",h:"Typing"},{w:"Mouse",h:"Clicking"},{w:"Printer",h:"Ink"},{w:"Toaster",h:"Bread"},{w:"Washing Machine",h:"Clothes"},{w:"Vacuum",h:"Dust"},{w:"Air Conditioner",h:"Cooling"},{w:"Fan",h:"Breeze"},{w:"Pencil",h:"Erase"},{w:"Pen",h:"Writing"},{w:"Lock",h:"Door"},{w:"Gun",h:"Shooting"},{w:"Boat",h:"Floating"},{w:"Submarine",h:"Underwater"},{w:"Satellite",h:"Orbit"},{w:"Guitar",h:"Strings"},{w:"Piano",h:"Keys"},{w:"Traffic Light",h:"Stop"},{w:"Ladder",h:"Climbing"},{w:"Parachute",h:"Falling"}],
+  "School & Education": [{w:"Homework",h:"Nightly"},{w:"Teacher",h:"Grading"},{w:"Backpack",h:"Straps"},{w:"Pencil Case",h:"Zipper"},{w:"Exam",h:"Nervous"},{w:"Recess",h:"Outside"},{w:"Blackboard",h:"Dusty"},{w:"Textbook",h:"Heavy"},{w:"Ruler",h:"Straight"},{w:"Eraser",h:"Mistakes"},{w:"Notebook",h:"Spiral"},{w:"Classroom",h:"Chairs"},{w:"Desk",h:"Sitting"},{w:"Chalk",h:"Powdery"},{w:"Principal",h:"Boss"},{w:"Student",h:"Raises hand"},{w:"Library",h:"Quiet"},{w:"Bell",h:"Signal"},{w:"Report Card",h:"Parents"},{w:"Grades",h:"A plus"},{w:"Lunchbox",h:"Sandwich"},{w:"Cafeteria",h:"Trays"},{w:"Playground",h:"Swings"},{w:"Bus",h:"Wheels"},{w:"Uniform",h:"Matching"},{w:"Locker",h:"Metal"},{w:"Whiteboard",h:"Wipeable"},{w:"Marker",h:"Colorful"},{w:"Glue",h:"Sticky"},{w:"Crayons",h:"Waxy"},{w:"Scissors",h:"Sharp"},{w:"Reading",h:"Stories"},{w:"Writing",h:"Sentences"},{w:"Math",h:"Numbers"},{w:"Science",h:"Experiments"},{w:"History",h:"Ancient"},{w:"Spelling",h:"Letters"},{w:"Alphabet",h:"Vowels"},{w:"Quiz",h:"Questions"},{w:"Diploma",h:"Framed"},{w:"Graduation",h:"Ceremony"},{w:"Detention",h:"Trouble"},{w:"Field Trip",h:"Museum"},{w:"Highlighter",h:"Neon"},{w:"Calculator",h:"Buttons"},{w:"Globe",h:"Spinning"},{w:"Map",h:"Directions"},{w:"Yearbook",h:"Photos"},{w:"Assignment",h:"Deadline"},{w:"Lesson",h:"Plan"},{w:"Classmate",h:"Friend"},{w:"Essay",h:"Paragraphs"},{w:"Gym",h:"Exercise"},{w:"Homeroom",h:"Morning"},{w:"Dictionary",h:"Meanings"}]
 };
 /* ======================================================= */
 
@@ -578,6 +742,21 @@ const CATEGORY_META = [
   ["Custom Words","pencil"]
 ];
 const CAT_ICON={};CATEGORY_META.forEach(([n,ic])=>CAT_ICON[n]=ic);
+
+const QCATEGORY_META = [
+  ["Daily Life & Social","chat"],["Love & Relationships","heart"],["Money & Fame","money"],
+  ["Future & Technology","chip"],["Childhood Memories","balloon"],["Goals & Dreams","target"],
+  ["Custom Questions","pencil"]
+];
+const QCAT_ICON={};QCATEGORY_META.forEach(([n,ic])=>QCAT_ICON[n]=ic);
+const QDATA = {
+  "Daily Life & Social": [{q:"What's your go-to comfort food after a long day?",imp:"What's a food you could eat every single day?"},{q:"How many alarms do you set in the morning?",imp:"How many times do you hit snooze before getting up?"},{q:"What's the first thing you do when you wake up?",imp:"What's the last thing you do before falling asleep?"},{q:"What time do you usually eat dinner?",imp:"What time do you usually go to bed?"},{q:"How many times a week do you cook at home?",imp:"How many times a week do you eat out?"},{q:"What's your favorite room in your home?",imp:"Where in your home do you relax the most?"},{q:"What's a small habit you're proud of?",imp:"What's a habit you'd like to break?"},{q:"How long is your daily commute in minutes?",imp:"How many minutes do you spend getting ready in the morning?"},{q:"What's your go-to karaoke song?",imp:"What song is stuck in your head right now?"},{q:"What color is your toothbrush?",imp:"What color is your phone case?"},{q:"What's your favorite ice cream flavor?",imp:"What's your favorite milkshake flavor?"},{q:"How many pairs of shoes do you own?",imp:"How many jackets or coats do you own?"},{q:"What's your favorite way to get around town?",imp:"How do you usually get to work or school?"},{q:"What day of the week do you do your grocery shopping?",imp:"What day do you usually do laundry?"},{q:"What's your favorite board or card game?",imp:"What's a game you played a lot as a kid?"},{q:"What's your favorite topping on pizza?",imp:"What's your favorite topping on a burger?"},{q:"What time do you usually wake up on weekends?",imp:"What time do you usually wake up on weekdays?"},{q:"What's your favorite dessert?",imp:"What dessert would you order at a birthday dinner?"},{q:"How many pillows do you sleep with?",imp:"How many blankets are on your bed?"},{q:"What's your favorite way to unwind after work?",imp:"What do you do to calm down when you're stressed?"},{q:"What's the last thing you bought online?",imp:"What's something you buy way too often?"},{q:"What's your favorite fruit?",imp:"What fruit do you put in a smoothie?"},{q:"What's your dream vacation destination?",imp:"Where would you go for a weekend getaway?"},{q:"What's your go-to order at a coffee shop in summer?",imp:"What warm drink do you order in winter?"},{q:"How many text messages do you send in a day?",imp:"How many photos do you take in a day?"},{q:"What's your favorite smell around the house?",imp:"What scent of candle do you like most?"},{q:"What's your favorite kind of weather?",imp:"What's your least favorite kind of weather?"},{q:"What's your favorite thing to eat for lunch?",imp:"What do you usually pack for a picnic?"},{q:"What's your favorite social media platform?",imp:"What app do you open when you're bored?"},{q:"How many hours do you spend watching TV on a weekend?",imp:"How many hours do you spend gaming on a weekend?"},{q:"What's your favorite thing to drink in the morning?",imp:"What do you drink with your dinner?"},{q:"What's your favorite kind of cookie?",imp:"What's your favorite kind of cake?"},{q:"What's a chore you actually find relaxing?",imp:"What's a chore you'd happily pay someone else to do?"},{q:"What's your favorite thing to do on a rainy day?",imp:"What do you like to do on a snow day?"},{q:"How many close friends do you keep in regular contact with?",imp:"How many group chats are you active in?"},{q:"What's your go-to breakfast on a busy morning?",imp:"What's your favorite lazy weekend breakfast?"},{q:"How old were you when you got your first phone?",imp:"How old were you when you learned to ride a bike?"},{q:"What's the last app you opened on your phone?",imp:"What app do you use the most?"},{q:"What do you eat when you're feeling sick?",imp:"What food do you crave on a rainy day?"},{q:"What's your favorite season?",imp:"What season were you born in?"},{q:"What's your favorite holiday?",imp:"What holiday do you find overrated?"},{q:"How many browser tabs do you have open?",imp:"How many notifications are on your phone right now?"},{q:"What's your favorite thing to cook?",imp:"What's the one dish you've truly mastered?"},{q:"How many cups of coffee do you drink a day?",imp:"How many cups of tea do you drink a day?"},{q:"What's your favorite fast food spot?",imp:"Where do you go to celebrate something?"},{q:"What emoji do you use the most?",imp:"What emoji matches your mood today?"},{q:"What's your phone ringtone?",imp:"What song do you use as your alarm?"},{q:"What's your favorite cuisine?",imp:"What cuisine do you order for takeout?"},{q:"What's your favorite weekend activity?",imp:"What do you do on a lazy Sunday?"},{q:"What pet would you love to have?",imp:"What pet did you have growing up?"},{q:"What snack do you get at the movies?",imp:"What snack do you keep in your bag?"},{q:"What show are you watching right now?",imp:"What show could you rewatch forever?"},{q:"What was your favorite subject in school?",imp:"What subject were you best at?"},{q:"What's your favorite month?",imp:"What month is your birthday?"},{q:"How many siblings do you have?",imp:"How many people live in your home?"},{q:"What's your favorite kind of sandwich?",imp:"What do you order at a deli?"},{q:"What do you order at a bar?",imp:"What cocktail would you order to look fancy?"},{q:"What's the wallpaper on your phone?",imp:"What's your computer's desktop background?"},{q:"What's your favorite kind of music?",imp:"What genre do you play while working?"},{q:"What do you look forward to on Fridays?",imp:"What's the best part of your weekend?"},{q:"What language would you love to learn?",imp:"What language did you study in school?"},{q:"What's your favorite condiment?",imp:"What sauce do you put on everything?"},{q:"How many keys are on your keychain?",imp:"How many cards are in your wallet?"},{q:"What's your favorite breakfast cereal?",imp:"What cereal did you eat as a kid?"},{q:"What's your favorite way to exercise?",imp:"What workout do you always avoid?"},{q:"What's your favorite piece of clothing?",imp:"What's the comfiest thing you own?"},{q:"What do you put on your toast?",imp:"What do you spread on a bagel?"},{q:"What sport do you like to watch?",imp:"What sport did you play as a kid?"},{q:"What year did you start your current job?",imp:"What year did you move into your current home?"}],
+  "Love & Relationships": [{q:"What's a classic romantic gesture?",imp:"What's a kind thing to do for a friend?"},{q:"What's a romantic dinner dish?",imp:"What's a dish you'd cook to impress guests?"},{q:"At what age did you have your first kiss?",imp:"At what age did you get your first phone?"},{q:"What flower says 'I love you'?",imp:"What flower belongs in a bouquet?"},{q:"What's a cute pet name for a partner?",imp:"What's a cute nickname for a friend?"},{q:"How many kids would you want?",imp:"How many pets would you love to have?"},{q:"What's a red flag on a first date?",imp:"What's a red flag in a job interview?"},{q:"What's a great anniversary gift?",imp:"What's a great birthday gift?"},{q:"What song would be your first wedding dance?",imp:"What song is on your feel-good playlist?"},{q:"What's the best month to get married?",imp:"What's the best month for a vacation?"},{q:"Who's your ultimate celebrity crush?",imp:"What celebrity would you love to meet?"},{q:"What's the best rom-com of all time?",imp:"What's a great movie for a cozy night in?"},{q:"What's an ick that turns you off instantly?",imp:"What's a habit that annoys you in public?"},{q:"How many people have you dated?",imp:"How many close friends do you have?"},{q:"How many hours would your ideal first date last?",imp:"How many hours is a perfect night out?"},{q:"What's a sweet good-morning text to send?",imp:"What's a nice thing to text a friend?"},{q:"What's your love language?",imp:"How do you show friends you care?"},{q:"What's an unforgettable date idea?",imp:"What's a fun weekend activity?"},{q:"At what age is it ideal to settle down?",imp:"At what age should you start a career?"},{q:"What's a dealbreaker in a relationship?",imp:"What's a dealbreaker in a roommate?"},{q:"What's the best cuisine for a first date?",imp:"What's your favorite type of cuisine?"},{q:"What TV couple is relationship goals?",imp:"What TV duo has the best friendship?"},{q:"What's a must-have quality in a soulmate?",imp:"What's a must-have quality in a boss?"},{q:"What's a cute couples' Halloween costume?",imp:"What's a fun costume for a party?"},{q:"How many dates before you're official?",imp:"How many hangouts before someone's a real friend?"},{q:"What's the most romantic city?",imp:"What city would you love to live in?"},{q:"What's the best pickup line?",imp:"What's a funny way to break the ice?"},{q:"What season is best for falling in love?",imp:"What's your favorite season?"},{q:"What's an instant green flag on a date?",imp:"What's a sign of a trustworthy coworker?"},{q:"What drink would you order on a date?",imp:"What's your go-to drink at a bar?"},{q:"What's a cozy at-home date idea?",imp:"What's a relaxing way to spend an evening?"},{q:"What year would you relive with your partner?",imp:"What year was the best of your life?"},{q:"What emoji best describes love?",imp:"What emoji do you use the most?"},{q:"What's a great couples' hobby?",imp:"What's a hobby you'd love to try?"},{q:"What's a romantic breakfast in bed?",imp:"What's your favorite breakfast food?"},{q:"How many weddings have you attended?",imp:"How many concerts have you been to?"},{q:"What's a perfect proposal setting?",imp:"What's a dream party venue?"},{q:"What's the ideal age gap in a couple?",imp:"What's a common age gap between siblings?"},{q:"What personality trait makes someone attractive?",imp:"What trait do you admire in a leader?"},{q:"What's the best way to meet a partner?",imp:"What's the best way to make new friends?"},{q:"What's a memorable wedding theme?",imp:"What's a fun party theme?"},{q:"How long should an engagement last?",imp:"How long should you date before moving in?"},{q:"What's the perfect Valentine's Day date?",imp:"What's a great way to celebrate a birthday?"},{q:"What show would a couple binge together?",imp:"What's a show worth binge-watching?"},{q:"What's the best day of the week for a date?",imp:"What's the best day for a night out?"},{q:"On a scale of 1-10, how romantic are you?",imp:"On a scale of 1-10, how adventurous are you?"},{q:"What's the first thing you notice on a date?",imp:"What's the first thing you notice about a stranger?"},{q:"What year did you have your first relationship?",imp:"What year did you graduate high school?"},{q:"How many anniversaries have you celebrated?",imp:"How many road trips have you taken?"},{q:"At what age is it ideal to have your first child?",imp:"At what age should you buy your first home?"},{q:"How many exes are you still friends with?",imp:"How many coworkers do you hang out with?"},{q:"Name a famous fictional couple.",imp:"Name a famous duo."},{q:"Which celebrity would be your dream date?",imp:"Which celebrity would you want as a best friend?"},{q:"Name a classic love song.",imp:"Name a great road-trip song."},{q:"Which fictional character is your ideal partner?",imp:"Which fictional character would you want as a sibling?"},{q:"What's the key to a lasting relationship?",imp:"What's the key to a strong friendship?"},{q:"What dessert would you share on a date?",imp:"What dessert would you order on a night out?"},{q:"What's the perfect Valentine's chocolate?",imp:"What's the perfect stocking-stuffer candy?"},{q:"What scent is attractive on a partner?",imp:"What scent reminds you of home?"},{q:"Where's a great spot for a first date?",imp:"Where's a great spot to meet new people?"},{q:"What's the best double-date activity?",imp:"What's the best group hangout?"},{q:"Where's the dreamiest honeymoon destination?",imp:"Where would you love to retire?"},{q:"What's the most attractive eye color?",imp:"What eye color is most common in your family?"},{q:"What's a good way to apologize to your partner?",imp:"What's a good way to cheer someone up?"},{q:"What's a classic date-night movie genre?",imp:"What's your go-to movie genre?"},{q:"What's a fun anniversary tradition?",imp:"What's a fun holiday tradition?"},{q:"What word describes true love?",imp:"What word describes pure happiness?"},{q:"What color represents love?",imp:"What color represents luck?"}],
+  "Money & Fame": [{q:"How much would you tip a celebrity chef?",imp:"How much do you usually tip at a restaurant?"},{q:"How much cash do you like to keep on hand?",imp:"How much is in your wallet right now?"},{q:"How much money counts as 'rich' to you?",imp:"How much would you need to never work again?"},{q:"How much would you pay for a night in a five-star hotel?",imp:"How much was your most expensive hotel stay?"},{q:"How much would you spend on a first date to impress?",imp:"How much do you spend on a night out?"},{q:"How much would you pay to skip a long theme park line?",imp:"How much do you spend on a movie night?"},{q:"How much cash would you carry on a big vacation?",imp:"How much would you pay for a fancy dinner for two?"},{q:"How much would you pay for a designer bag?",imp:"How much did your phone cost?"},{q:"How much would you spend on a dream vacation?",imp:"How much would the wedding you'd throw cost?"},{q:"How much would you pay for a luxury watch?",imp:"How much would you spend on a home makeover?"},{q:"How much would you pay for front-row concert seats?",imp:"How much would you spend on a nice pair of shoes?"},{q:"What percent of a jackpot would you donate?",imp:"What percent of your paycheck do you try to save?"},{q:"What percent raise would make you truly happy?",imp:"What percent tip counts as generous?"},{q:"Which celebrity would you want as a neighbor?",imp:"Which celebrity would annoy you as a roommate?"},{q:"Which musician deserves more fame?",imp:"Which musician is overrated?"},{q:"Which billionaire would you want as a mentor?",imp:"Which billionaire seems the most out of touch?"},{q:"Which athlete would you trade lives with?",imp:"Which athlete is the most overpaid?"},{q:"Which movie star has the best style?",imp:"Which movie star would play you in a film?"},{q:"Which YouTuber is worth their millions?",imp:"Which YouTuber do you always skip?"},{q:"Which reality star is secretly smart?",imp:"Which reality star would you vote off first?"},{q:"Which famous person throws the best parties?",imp:"Which famous person would you cast in a movie?"},{q:"Name a musician you'd pay big money to see live.",imp:"Name a musician who's everywhere right now."},{q:"Which celebrity would you trust to plan your wedding?",imp:"Which celebrity would make a surprisingly good president?"},{q:"Which fictional character is the richest?",imp:"Which fictional character would you be?"},{q:"Who's the most famous person you've ever met?",imp:"Who's the most successful person you know?"},{q:"What job would make you feel famous?",imp:"What job did you dream of as a kid?"},{q:"What's the most glamorous job title?",imp:"What job would you be terrible at?"},{q:"What career creates the most millionaires?",imp:"What career looks easy but really isn't?"},{q:"If you won the lottery, what's the first thing you'd buy?",imp:"What's the most expensive thing you own?"},{q:"What splurge is totally worth it?",imp:"What purchase do you regret?"},{q:"What would you buy your best friend if you were rich?",imp:"What's the best gift you've ever given?"},{q:"What gadget would you buy with unlimited money?",imp:"What's the newest gadget you own?"},{q:"What would you splurge on for your home?",imp:"What's the last thing you bought for your home?"},{q:"What luxury would you never give up once rich?",imp:"What small luxury do you enjoy now?"},{q:"What luxury car would you buy if money were no object?",imp:"What car do you drive or wish you drove?"},{q:"What color would you paint your dream sports car?",imp:"What's your favorite color to wear?"},{q:"What color screams luxury to you?",imp:"What's the fanciest color for a dress?"},{q:"What's the ideal age to become famous?",imp:"What age do you feel most yourself?"},{q:"At what age would you want to retire rich?",imp:"At what age do people usually peak in their career?"},{q:"At what age did you earn your first paycheck?",imp:"At what age should someone start investing?"},{q:"What decade had the most glamorous stars?",imp:"What decade had the best fashion?"},{q:"What year do you hope to be debt-free?",imp:"What year do you plan to retire?"},{q:"Which city would you buy a mansion in?",imp:"Which city feels the most glamorous?"},{q:"Where would you fly first on a private jet?",imp:"What's the most beautiful place you've visited?"},{q:"Where would you buy a vacation home?",imp:"Where's the fanciest place you've ever stayed?"},{q:"Which country is best for the rich and famous?",imp:"Which country would you love to visit?"},{q:"What food would you serve at a billionaire's party?",imp:"What's the fanciest food you've eaten?"},{q:"What's the most overpriced food you've ever bought?",imp:"What snack do fancy places charge too much for?"},{q:"What drink would you order at a millionaire's bar?",imp:"What's your go-to party drink?"},{q:"How would you spend a lazy day as a millionaire?",imp:"What's your favorite way to relax?"},{q:"What would you do first after becoming famous?",imp:"What's on your bucket list?"},{q:"What hobby would you pick up as a rich person?",imp:"What hobby have you always wanted to try?"},{q:"What brand screams 'rich' to you?",imp:"What brand do you own the most of?"},{q:"How many followers would you need to quit your job?",imp:"How many followers does an account need to feel 'big'?"},{q:"How many cars would you own if you were rich?",imp:"How many pairs of shoes do you own?"},{q:"How many vacations a year would rich you take?",imp:"How many trips did you take last year?"},{q:"What would you name your yacht?",imp:"What would you name a racehorse?"},{q:"What would your celebrity fragrance be called?",imp:"What would you name a nail polish color?"},{q:"What would your reality show be called?",imp:"What would you title your memoir?"},{q:"What charity would you donate a million to?",imp:"What cause do you care most about?"},{q:"What talent would make you rich overnight?",imp:"What's a hidden talent of yours?"},{q:"What status symbol do you find silly?",imp:"What status symbol do you secretly want?"},{q:"What pet would a billionaire own?",imp:"What's the most exotic animal you've seen?"},{q:"What app made someone famous?",imp:"What app do you waste the most time on?"},{q:"Which award would you love to win?",imp:"Which award is the most overrated?"},{q:"What song would play when famous-you enters a room?",imp:"What's your karaoke go-to?"},{q:"What would you wear on the red carpet?",imp:"What's the fanciest outfit you own?"},{q:"What's the fastest way to get famous today?",imp:"What's the fastest way to go broke?"},{q:"What would you auction off to a superfan?",imp:"What's something you'd never sell?"},{q:"What's the most famous last name in the world?",imp:"What last name sounds the fanciest?"},{q:"What's the smartest way to spend a surprise bonus?",imp:"What's the first thing you'd do with extra cash?"},{q:"What's the best perk of being famous?",imp:"What's the best part of being rich?"},{q:"What's the worst part of being famous?",imp:"What's a real downside of being rich?"},{q:"What's your claim to fame?",imp:"What could you actually win an award for?"}],
+  "Future & Technology": [{q:"What gadget will everyone own in 10 years?",imp:"What gadget did you buy most recently?"},{q:"Which movie robot would you want as a sidekick?",imp:"Which movie robot is the most famous?"},{q:"Which planet will humans live on first?",imp:"Which planet would you most like to visit?"},{q:"Which sci-fi movie predicted the future best?",imp:"Which sci-fi movie have you rewatched the most?"},{q:"What year will flying cars be everywhere?",imp:"What year will robots do all the housework?"},{q:"What job will AI replace first?",imp:"What job did you dream of as a kid?"},{q:"How many smart devices are in your home?",imp:"How many charging cables do you own?"},{q:"What will replace the smartphone?",imp:"What device do you check first every morning?"},{q:"Which tech company will dominate in 2050?",imp:"Which tech company would you want to work for?"},{q:"Which app will still exist in 20 years?",imp:"Which app did you open last?"},{q:"What invention does the world still need?",imp:"What invention changed your daily life the most?"},{q:"Which future technology feels most like magic?",imp:"Which technology impressed you most this year?"},{q:"What color will most cars be in the future?",imp:"What color is your phone case?"},{q:"What food will astronauts eat on Mars?",imp:"What food would you miss most in space?"},{q:"At what age should kids get their first phone?",imp:"At what age did you get your first phone?"},{q:"Which programming language will power the future?",imp:"Which programming language would you learn first?"},{q:"Which social media platform will die first?",imp:"Which social media platform do you use most?"},{q:"How will people commute in 50 years?",imp:"How do you usually get to work?"},{q:"Which emoji will still be popular in 2040?",imp:"Which emoji do you use the most?"},{q:"How many streaming subscriptions do you have?",imp:"How many smart home gadgets do you own?"},{q:"What chore will robots do for us first?",imp:"What chore do you hate doing the most?"},{q:"In what year will self-driving cars be everywhere?",imp:"In what year will phones become obsolete?"},{q:"Which sci-fi gadget do you wish were real?",imp:"Which sci-fi gadget shows up in movies the most?"},{q:"What will power our homes in the future?",imp:"What powers most homes today?"},{q:"What would you do first in a perfect VR world?",imp:"What do you do most in video games?"},{q:"Which space destination will tourists visit first?",imp:"Which space destination would you pay to see?"},{q:"How many hours a day will people work in the future?",imp:"How many hours a day are you on screens?"},{q:"What will we use instead of cash?",imp:"How do you usually pay for things?"},{q:"What new sport will exist in the future?",imp:"What sport do you watch the most?"},{q:"What tech would you bring to a desert island?",imp:"What tech can't you leave home without?"},{q:"What will you use AI for most in 10 years?",imp:"What did you use AI for last?"},{q:"Which car brand will lead the electric future?",imp:"Which car brand would you love to own?"},{q:"How much will the next must-have gadget cost?",imp:"How much did your phone cost?"},{q:"What's the first thing you'd tell a smart home to do?",imp:"What do you ask your voice assistant most?"},{q:"Which body part would you upgrade with tech?",imp:"Which body part gets sore from using devices?"},{q:"Which movie AI would you trust?",imp:"Which movie AI is the scariest?"},{q:"How many robots will a future home have?",imp:"How many remote controls are in your living room?"},{q:"What new subject will schools teach in the future?",imp:"What was your favorite subject in school?"},{q:"What will drones deliver most?",imp:"What do you order for delivery most?"},{q:"What everyday object will disappear first?",imp:"What object do you always lose?"},{q:"What job will humans always do better than robots?",imp:"What job would you never want?"},{q:"Which app should everyone delete?",imp:"Which app do you regret downloading?"},{q:"Which gadget already feels ancient?",imp:"Which gadget did you own as a kid?"},{q:"How many screens will the average home have?",imp:"How many TVs are in your home?"},{q:"What kind of robot pet would you want?",imp:"What kind of pet do you have or want?"},{q:"Which tech visionary will shape the future?",imp:"Which tech CEO do you recognize most?"},{q:"What will clothes be able to do in the future?",imp:"What do you wish your clothes could do?"},{q:"Which room will get the most tech?",imp:"Which room do you spend the most time in?"},{q:"Which game console will define the next generation?",imp:"Which game console did you grow up with?"},{q:"What technology are you most excited about?",imp:"What technology makes you most nervous?"},{q:"What food will be 3D-printed in the future?",imp:"What food do you order for delivery most?"},{q:"How fast (mph) will future cars go?",imp:"How fast has a car you've ridden gone?"},{q:"What will we name the first Mars city?",imp:"What would you name a new space station?"},{q:"What's a good name for a household robot?",imp:"What's a good name for a self-driving car?"},{q:"Which cryptocurrency will still exist in 20 years?",imp:"Which cryptocurrency have you heard of most?"},{q:"Which everyday object will become 'smart' next?",imp:"Which smart gadget do you already own?"},{q:"What will replace passwords in the future?",imp:"What do you use to unlock your phone?"},{q:"What topic would you trust AI to answer?",imp:"What did you last look up online?"},{q:"What emotion will robots learn last?",imp:"What emotion do you feel using new tech?"},{q:"Which company will build the first Mars base?",imp:"Which company's products do you own the most?"},{q:"At what age will kids code fluently?",imp:"At what age did you first use a computer?"},{q:"What superpower will technology give us first?",imp:"What superpower would you pick for yourself?"},{q:"What will everyone 3D-print at home?",imp:"What's something you'd love to 3D-print?"},{q:"Which city will be the most high-tech?",imp:"Which city would you love to visit?"},{q:"Whose voice should all robots have?",imp:"Whose voice could you listen to all day?"},{q:"What will replace game consoles?",imp:"What do you play video games on?"},{q:"What one word describes the year 2100?",imp:"What one word describes technology today?"}],
+  "Childhood Memories": [{q:"What cereal did you eat most mornings as a kid?",imp:"What cereal did you beg your parents to buy?"},{q:"How old were you when you learned to ride a bike?",imp:"How old were you when you lost your first tooth?"},{q:"What game did you play at recess?",imp:"What game did you play at birthday parties?"},{q:"What nickname did your family call you?",imp:"What nickname did kids at school give you?"},{q:"What candy did you spend your allowance on?",imp:"What candy did you get most while trick-or-treating?"},{q:"Who was your favorite cartoon character?",imp:"Which cartoon character scared you as a kid?"},{q:"What time was your bedtime growing up?",imp:"What time did you have to be home for dinner?"},{q:"What chore did you hate the most?",imp:"What chore earned you extra allowance?"},{q:"What was your favorite ride at the fair?",imp:"What ride were you too scared to go on?"},{q:"What did you snack on right after school?",imp:"What did you always find packed in your lunchbox?"},{q:"What board game did your family play together?",imp:"What board game caused the biggest arguments?"},{q:"Where did your family go on summer vacation?",imp:"Where did your class go on a field trip?"},{q:"What stuffed animal did you sleep with?",imp:"What toy did you take everywhere with you?"},{q:"What show did you rush home to watch?",imp:"What show were you not allowed to watch?"},{q:"What sport did you play growing up?",imp:"What sport did your parents make you try?"},{q:"What color were your bedroom walls as a kid?",imp:"What was your favorite crayon color?"},{q:"How much allowance did you get each week?",imp:"How much did the tooth fairy leave you?"},{q:"What was the first video game you owned?",imp:"What game did you always play at a friend's house?"},{q:"What song did you know every single word to?",imp:"What song did your parents always play in the car?"},{q:"Who was your favorite teacher?",imp:"Which teacher did the whole class fear?"},{q:"What fast-food place did you beg to go to?",imp:"What restaurant did your family go to for celebrations?"},{q:"What was your favorite Halloween costume?",imp:"What costume did you wear in a school play?"},{q:"What was your childhood best friend's name?",imp:"What was the name of the kid next door?"},{q:"What movie did you watch over and over?",imp:"What movie made you cry as a kid?"},{q:"Where was your best hide-and-seek spot?",imp:"Where did you build your childhood fort?"},{q:"What did you collect as a kid?",imp:"What did you trade with friends at school?"},{q:"What was your favorite thing to do at summer camp?",imp:"What did you do all day on summer break?"},{q:"What were you scared of as a kid?",imp:"What did you check for under your bed?"},{q:"What grade in school was your favorite?",imp:"What grade did you find the hardest?"},{q:"What was the theme of your best birthday party?",imp:"What birthday theme did you want but never got?"},{q:"What ice cream flavor did you always order?",imp:"What flavor did the ice cream truck always sell out of?"},{q:"What book did you read again and again?",imp:"What book did your teacher read to the class?"},{q:"What did you do at sleepovers?",imp:"What did you stay up all night doing?"},{q:"What was your first set of wheels as a kid?",imp:"What did all the kids ride around your neighborhood?"},{q:"What drink did you always have with dinner?",imp:"What did you fill your thermos with for lunch?"},{q:"What was your favorite thing on the playground?",imp:"What playground equipment did you fall off of?"},{q:"What did you do on Saturday mornings?",imp:"What did you do the second you got home from school?"},{q:"What car did your family drive when you were little?",imp:"What car did your grandparents have?"},{q:"What was your imaginary friend's name?",imp:"What did you name your favorite doll or toy?"},{q:"What game console did you grow up with?",imp:"What console did you wish you had?"},{q:"What did you buy from the ice cream truck?",imp:"What frozen treat did you make at home?"},{q:"What character was on your lunchbox?",imp:"What character was on your backpack?"},{q:"What sneakers did you beg your parents for?",imp:"What shoes did you wear until they fell apart?"},{q:"What did you do on snow days?",imp:"What did you do on rainy days stuck inside?"},{q:"What was your favorite holiday as a kid?",imp:"What holiday did your family make the biggest deal of?"},{q:"What was the best gift you ever got as a kid?",imp:"What gift did you ask for every single year?"},{q:"What sports team did you root for as a kid?",imp:"What team was your family obsessed with?"},{q:"What year did you start kindergarten?",imp:"What year did you start middle school?"},{q:"What did you do at your grandparents' house?",imp:"What did you do at your cousins' house?"},{q:"What was the name of your first pet?",imp:"What was the name of a neighbor's pet you loved?"},{q:"What vegetable did you refuse to eat as a kid?",imp:"What vegetable did you secretly feed to the dog?"},{q:"How old were you when you got your first phone?",imp:"How old were you when you first flew on a plane?"},{q:"How many cousins were you close with growing up?",imp:"How many kids were in your neighborhood crew?"},{q:"What did you bring for show-and-tell?",imp:"What toy did you sneak into school?"},{q:"How old were you when you learned to swim?",imp:"How old were you at your first sleepover?"},{q:"What was your favorite school lunch?",imp:"What school lunch did you dread?"},{q:"What did you always order at a diner?",imp:"What snack did you always get at the movies?"},{q:"What was the name of your childhood street?",imp:"What was the name of your elementary school?"},{q:"What did you spend your tooth fairy money on?",imp:"What did you buy at the school book fair?"},{q:"What pet did you always beg your parents for?",imp:"What pet did a friend have that you envied?"},{q:"What was your favorite food at a fair or carnival?",imp:"What food did you always get at a ballpark?"},{q:"What instrument did you play or try as a kid?",imp:"What instrument did you wish you could play?"},{q:"What was your favorite season as a kid?",imp:"What season did you dread going back to school in?"},{q:"What superhero did you pretend to be?",imp:"What superhero did you think was overrated?"},{q:"What was your favorite thing to draw as a kid?",imp:"What did you always doodle in your notebooks?"},{q:"What was your comfort food when you were sick?",imp:"What did a grandparent always cook for you?"},{q:"What was your favorite carnival game?",imp:"What arcade game did you love?"},{q:"What show did your family watch together?",imp:"What show did you sneak-watch past bedtime?"},{q:"What was your favorite pizza topping as a kid?",imp:"What topping did you always pick off?"},{q:"What was your favorite zoo animal to visit?",imp:"What animal were you afraid of as a kid?"},{q:"What was your favorite weekend breakfast?",imp:"What breakfast did a parent make on special mornings?"},{q:"What phrase did your parents always say to you?",imp:"What did a teacher always say in class?"}],
+  "Goals & Dreams": [{q:"What's the first thing you'd buy if you won the lottery?",imp:"What's the first thing you'd buy with your next paycheck?"},{q:"What instrument do you dream of learning?",imp:"What instrument do you think is hardest to master?"},{q:"What's your dream vacation destination?",imp:"Where did you take your best vacation ever?"},{q:"What language do you wish you could speak fluently?",imp:"What language sounds the most beautiful to you?"},{q:"What's your biggest goal for this year?",imp:"What's a goal you gave up on last year?"},{q:"What dream job did you want as a kid?",imp:"What job did your parents want you to have?"},{q:"What animal would you love to own someday?",imp:"What animal would you be terrified to own?"},{q:"What city would you love to live in one day?",imp:"What city do you never want to move back to?"},{q:"How many kids do you dream of having?",imp:"How many siblings do you have?"},{q:"What sport do you wish you were great at?",imp:"What sport do you find most boring to watch?"},{q:"What's a hobby you want to pick up this year?",imp:"What's a hobby you quit and don't miss?"},{q:"What would your dream house be made of?",imp:"What is your current home mostly made of?"},{q:"What famous person would you love to meet?",imp:"What famous person do you find overrated?"},{q:"What's your dream car?",imp:"What car did you learn to drive in?"},{q:"What's a physical feat you dream of achieving?",imp:"What's a physical feat you'll never attempt?"},{q:"What business would you love to start?",imp:"What business do you think is doomed to fail?"},{q:"What's your dream pet's name?",imp:"What was your childhood pet's name?"},{q:"What food would you love to learn to cook perfectly?",imp:"What food do you always burn?"},{q:"What's a world record you'd love to break?",imp:"What's a world record you find pointless?"},{q:"What dance style do you wish you could master?",imp:"What dance style makes you cringe?"},{q:"What's your dream wedding location?",imp:"Where would you never want to get married?"},{q:"What cause would you fund if you were rich?",imp:"What cause do you think gets too little attention?"},{q:"What subject do you wish you'd studied?",imp:"What subject did you struggle with most in school?"},{q:"What's one gadget you dream of owning?",imp:"What gadget do you think is a waste of money?"},{q:"What kind of art do you dream of creating?",imp:"What kind of art do you just not get?"},{q:"What company would you love to work for?",imp:"What company would you never work for?"},{q:"What's a talent show act you'd love to perform?",imp:"What talent show act always flops?"},{q:"What's the dream age to retire early?",imp:"At what age do most people in your family retire?"},{q:"What would you name your future band?",imp:"What was a band you were obsessed with as a teen?"},{q:"What adventure sport do you want to try?",imp:"What adventure sport looks way too dangerous?"},{q:"What's your dream side hustle?",imp:"What side hustle sounds exhausting to you?"},{q:"What's a childhood dream you still hope to fulfill?",imp:"What's a childhood dream you've completely outgrown?"},{q:"What would your dream backyard have in it?",imp:"What's currently in your backyard?"},{q:"What season would you want your dream getaway in?",imp:"What season are you usually busiest?"},{q:"What would you invent if you were an engineer?",imp:"What invention do you think we didn't need?"},{q:"What luxury item do you dream of owning?",imp:"What luxury item do you think is a rip-off?"},{q:"What's your dream way to spend a day off?",imp:"How do you usually waste a day off?"},{q:"What historical era would you love to visit?",imp:"What historical era would you hate to live in?"},{q:"What's a milestone you hope to reach by 30?",imp:"What's a milestone you reached earlier than expected?"},{q:"What would your dream tattoo be?",imp:"What tattoo would you talk a friend out of?"},{q:"What plant do you dream of growing?",imp:"What plant do you always manage to kill?"},{q:"What's your dream mode of transport to own?",imp:"What's your least favorite way to travel?"},{q:"What volunteer trip would you love to take?",imp:"What kind of volunteering isn't for you?"},{q:"What skill would you master overnight if you could?",imp:"What skill did you spend years trying to learn?"},{q:"What's the one dream you'd chase if you couldn't fail?",imp:"What's a dream you talked yourself out of?"},{q:"What's your dream job?",imp:"What job would you quit after one day?"},{q:"By what age do you hope to be a millionaire?",imp:"By what age do you hope to own a home?"},{q:"What year do you hope to travel to space?",imp:"What year do you hope to finally retire?"},{q:"How many countries do you dream of visiting?",imp:"How many countries have you already visited?"},{q:"What's the biggest thing on your bucket list?",imp:"What adventure would you talk yourself out of?"},{q:"What's your dream home?",imp:"What kind of home could you never live in?"},{q:"How much money would let you retire happy?",imp:"How much would your dream house cost?"},{q:"What kind of book do you dream of writing?",imp:"What kind of book do you love to read?"},{q:"Who would you love to work with someday?",imp:"Who do you admire most in their field?"},{q:"What award would you dream of winning?",imp:"What award do you think is hardest to win?"},{q:"How many years until you reach your big goal?",imp:"How many years have you chased this dream?"},{q:"What color is your dream car?",imp:"What color would your dream house be?"},{q:"How many books do you dream of writing?",imp:"How many books do you hope to read this year?"},{q:"What artist would you dream of seeing live?",imp:"What artist is on repeat for you right now?"},{q:"How long is your dream vacation?",imp:"How long could you travel before missing home?"},{q:"What cuisine do you dream of mastering?",imp:"What cuisine could you eat every day?"},{q:"How many languages do you hope to speak?",imp:"How many instruments would you love to play?"},{q:"What role would you dream of playing on screen?",imp:"What character do you wish you could be?"},{q:"What mountain do you dream of climbing?",imp:"What trail would you love to hike?"}]
+};
 
 /* ================= SVG ICONS ================= */
 const ICONS={
@@ -617,6 +796,11 @@ const ICONS={
   ghost:'<path d="M5 21V11a7 7 0 0 1 14 0v10l-2.5-2-2.5 2-2-2-2 2-2.5-2z"/><circle cx="9.5" cy="10.5" r="1"/><circle cx="14.5" cy="10.5" r="1"/>',
   cap:'<path d="M22 9 12 5 2 9l10 4z"/><path d="M6 10.5V15c0 1.4 2.7 3 6 3s6-1.6 6-3v-4.5"/><path d="M22 9v5"/>',
   lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  heart:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/>',
+  money:'<line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  chip:'<rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4"/>',
+  balloon:'<path d="M12 3a5 6 0 0 0 0 12 5 6 0 0 0 0-12z"/><path d="M12 15v3"/><path d="M10.6 21a1.4 1 0 0 0 2.8 0"/>',
   dot:'<circle cx="12" cy="12" r="3"/>'
 };
 function icon(name,size){
@@ -642,6 +826,9 @@ const S = {
   showHintToImposter:true,
   impostersKnowEachOther:false,
   customWords:[],         // {w, h}
+  mode:'word',            // 'word' | 'questions'
+  qCategories:{},         // name -> true (questions mode)
+  customQuestions:[],     // {q, imp}
   round:null
 };
 
@@ -650,6 +837,7 @@ function save(){ try{ localStorage.setItem('imposter', JSON.stringify({
   imposterNeverFirst:S.imposterNeverFirst,categories:S.categories,
   showCategoryToImposter:S.showCategoryToImposter,showHintToImposter:S.showHintToImposter,
   impostersKnowEachOther:S.impostersKnowEachOther,customWords:S.customWords,
+  mode:S.mode,qCategories:S.qCategories,customQuestions:S.customQuestions,
   theme:document.documentElement.getAttribute('data-theme')
 }));}catch(e){} }
 function load(){
@@ -660,7 +848,8 @@ function load(){
       randomImposters:!!d.randomImposters,imposterNeverFirst:!!d.imposterNeverFirst,
       categories:d.categories||{},showCategoryToImposter:d.showCategoryToImposter!==false,
       showHintToImposter:d.showHintToImposter!==false,impostersKnowEachOther:!!d.impostersKnowEachOther,
-      customWords:d.customWords||[]
+      customWords:d.customWords||[],mode:(d.mode==='questions'?'questions':'word'),
+      qCategories:d.qCategories||{},customQuestions:d.customQuestions||[]
     });
     if(d.theme) document.documentElement.setAttribute('data-theme',d.theme);
     }
@@ -678,13 +867,18 @@ function go(id){
   if(id==='cats') renderCats();
   if(id==='custom') renderCustom();
   if(id==='pass' && S.round) renderPass();
+  if(id==='qsetup') renderQSetup();
+  if(id==='qcats') renderQCats();
+  if(id==='qcustom') renderQCustom();
+  if(id==='qdiscuss') renderQDiscuss();
+  if(id==='qresults') renderQResults();
   save();
 }
 
 /* ================= THEME ================= */
 function applyThemeBtns(){
   const dark=document.documentElement.getAttribute('data-theme')==='dark';
-  document.querySelectorAll('#themeBtn,#themeBtn2').forEach(b=>b.innerHTML=icon(dark?'sun':'moon',20));
+  document.querySelectorAll('#themeBtn,#themeBtn2,#themeBtn3').forEach(b=>b.innerHTML=icon(dark?'sun':'moon',20));
 }
 function toggleTheme(){
   const cur=document.documentElement.getAttribute('data-theme');
@@ -751,6 +945,7 @@ function renderImp(){
   const card=document.getElementById('impStepCard');
   card.style.opacity=S.randomImposters?'.4':'1';
   card.style.pointerEvents=S.randomImposters?'none':'auto';
+  const nf=document.getElementById('neverFirstRow'); if(nf) nf.style.display=S.mode==='questions'?'none':'';
 }
 
 /* ================= CATEGORIES ================= */
@@ -852,7 +1047,7 @@ function renderPass(){
     const c=document.createElement('div');
     c.className='pcard'+(seen?' done':'');
     c.innerHTML=`<div class="av q">${seen?icon('lock',34):initial(n)}</div><div class="pn">${escapeHtml(n)}</div>`;
-    c.onclick = seen ? (()=>flash('Already revealed — pass the phone')) : (()=>openRole(i));
+    c.onclick = seen ? (()=>flash('Already revealed — pass the phone')) : (()=>openReveal(i));
     g.appendChild(c);
   });
   updateSeen();
@@ -864,7 +1059,7 @@ function updateSeen(){
 }
 
 /* ================= ROLE REVEAL ================= */
-let curPlayer=-1, curRevealed=false;
+let curPlayer=-1, curRevealed=false, curQRevealed=false;
 function openRole(i){
   if(S.round.seen[i]){ flash('Already revealed — pass the phone'); return; }
   curPlayer=i; curRevealed=false;
@@ -954,7 +1149,204 @@ function newRound(){
   if(!cats.length){ go('setup'); return; }
   buildRound(cats); go('pass');
 }
-function confirmQuit(){ go('setup'); }
+function confirmQuit(){ go(S.mode==='questions'?'qsetup':'setup'); }
+
+/* ================= MODE / NAV HELPERS ================= */
+function setMode(m){
+  S.mode=m;
+  document.querySelectorAll('#modeSeg .modeseg-btn').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  const t=document.getElementById('tagline'); if(t) t.textContent = m==='questions' ? 'One question. One faker. Find them.' : 'One word. One faker. Find them.';
+  save();
+}
+function startRound(){ go(S.mode==='questions'?'qsetup':'setup'); }
+function openRules(){
+  const q = S.mode==='questions';
+  document.getElementById('rulesWord').style.display=q?'none':'';
+  document.getElementById('rulesQ').style.display=q?'':'none';
+  go('rules');
+}
+function backToSetup(){ go(S.mode==='questions'?'qsetup':'setup'); }
+function openReveal(i){
+  if(S.round.seen[i]){ flash('Already revealed — pass the phone'); return; }
+  if(S.round.q) openQRole(i); else openRole(i);
+}
+function afterReveal(){ go(S.round && S.round.q ? 'qdiscuss' : 'play'); }
+
+/* ================= QUESTIONS: SETUP / CATEGORIES / CUSTOM ================= */
+function renderQSetup(){
+  syncSwitches();
+  document.getElementById('qSumPlayers').textContent=S.players.length+(S.players.length===1?' player':' players');
+  document.getElementById('qSumImp').textContent=S.randomImposters?'Random (1–3)':(S.numImposters+(S.numImposters===1?' imposter':' imposters'));
+  const sel=selectedQCategoryNames();
+  document.getElementById('qSumCats').textContent=sel.length?sel.length+' selected':'Select categories to play with';
+  const cq=S.customQuestions.length;
+  document.getElementById('qSumCustom').textContent=cq?cq+(cq===1?' pair added':' pairs added'):'Add your own question pairs (optional)';
+  document.getElementById('qsetupErr').textContent='';
+}
+function selectedQCategoryNames(){
+  return Object.keys(S.qCategories).filter(c=>S.qCategories[c] && (c!=='Custom Questions' || S.customQuestions.length));
+}
+function renderQCats(){
+  const wrap=document.getElementById('qcatList'); wrap.innerHTML='';
+  const list=QCATEGORY_META.filter(([n])=>n!=='Custom Questions');
+  if(S.customQuestions.length) list.push(['Custom Questions','pencil']);
+  list.forEach(([name,ic])=>{
+    const on=!!S.qCategories[name];
+    const card=document.createElement('button');
+    card.className='catcard'+(on?' on':'');
+    card.innerHTML=`<span class="cbadge">${icon('check',14)}</span>
+      <span class="cicon">${icon(ic,27)}</span>
+      <span class="cname">${escapeHtml(name)}</span>`;
+    card.onclick=()=>{S.qCategories[name]=!S.qCategories[name];renderQCats();save();};
+    wrap.appendChild(card);
+  });
+  const cnt=selectedQCategoryNames().length;
+  document.getElementById('qccount').textContent=cnt;
+  document.getElementById('qccount2').textContent=cnt;
+}
+function allQCats(v){
+  QCATEGORY_META.forEach(([n])=>{ if(n!=='Custom Questions') S.qCategories[n]=v; });
+  if(S.customQuestions.length) S.qCategories['Custom Questions']=v;
+  renderQCats(); save();
+}
+function renderQCustom(){
+  const wrap=document.getElementById('qcwlist'); wrap.innerHTML='';
+  S.customQuestions.forEach((cq,i)=>{
+    const row=document.createElement('div'); row.className='prow';
+    row.innerHTML=`<span class="num">${i+1}</span>
+      <input value="${escapeAttr(cq.q)} / ${escapeAttr(cq.imp)}" readonly style="color:var(--text)"/>
+      <button class="del">✕</button>`;
+    row.querySelector('.del').onclick=()=>{S.customQuestions.splice(i,1); if(!S.customQuestions.length) S.qCategories['Custom Questions']=false; renderQCustom(); save();};
+    wrap.appendChild(row);
+  });
+  document.getElementById('qcwcount').textContent=S.customQuestions.length;
+}
+function addQCustom(){
+  const q=document.getElementById('qcwMain').value.trim();
+  const imp=document.getElementById('qcwImp').value.trim();
+  if(!q||!imp){ flash('Fill in both questions'); return; }
+  S.customQuestions.push({q:q,imp:imp});
+  S.qCategories['Custom Questions']=true;
+  document.getElementById('qcwMain').value='';
+  document.getElementById('qcwImp').value='';
+  document.getElementById('qcwMain').focus();
+  renderQCustom(); save();
+}
+
+/* ================= QUESTIONS: ROUND ================= */
+function poolQFor(cat){
+  if(cat==='Custom Questions') return S.customQuestions.map(c=>({q:c.q,imp:c.imp}));
+  return QDATA[cat]||[];
+}
+function startQGame(){
+  const err=document.getElementById('qsetupErr');
+  if(S.players.length<3){err.textContent='Add at least 3 players.';return;}
+  const cats=selectedQCategoryNames().filter(c=>poolQFor(c).length);
+  if(!cats.length){err.textContent='Pick at least one category (with questions).';return;}
+  buildQRound(cats); go('pass');
+}
+function buildQRound(cats){
+  const n=S.players.length;
+  const capMax=Math.max(1,Math.min(3,n-2));
+  let numImp=S.randomImposters ? 1+Math.floor(Math.random()*capMax) : Math.min(S.numImposters,capMax);
+  const cat=cats[Math.floor(Math.random()*cats.length)];
+  const pool=poolQFor(cat);
+  const pair=pool[Math.floor(Math.random()*pool.length)];
+  const idx=[...Array(n).keys()]; shuffle(idx);
+  const imposters=new Set(idx.slice(0,numImp));
+  S.round={ q:true, category:cat, mainQ:pair.q, impQ:pair.imp, imposters, numImp,
+    seen:new Array(n).fill(false), answers:new Array(n).fill('') };
+  renderPass();
+}
+
+/* ================= QUESTIONS: REVEAL + ANSWER ================= */
+function openQRole(i){
+  curPlayer=i; curQRevealed=false;
+  const r=S.round;
+  document.getElementById('qroleName').textContent='The question for '+S.players[i];
+  const catEl=document.getElementById('qroleCat');
+  if(S.showCategoryToImposter){ catEl.textContent='Category: '+r.category; catEl.style.display=''; }
+  else { catEl.style.display='none'; }
+  const box=document.getElementById('qsecretbox');
+  box.className='secretbox';
+  box.innerHTML='<div class="tap">'+icon('eye',18)+' Tap to reveal your question</div>';
+  document.getElementById('qroleExtra').innerHTML='';
+  document.getElementById('qanswerWrap').style.display='none';
+  document.getElementById('qanswerInput').value=r.answers[i]||'';
+  document.getElementById('qroleBack').style.visibility='visible';
+  go('qrole');
+}
+function doQReveal(){
+  if(curQRevealed) return;
+  curQRevealed=true;
+  const i=curPlayer, r=S.round, isImp=r.imposters.has(i);
+  const box=document.getElementById('qsecretbox');
+  const fx='<span class="shine"></span><span class="ring"></span>';
+  const q = isImp ? r.impQ : r.mainQ;
+  box.className='secretbox revealed'+(isImp?' imp':'');
+  box.innerHTML=fx+'<div>'
+    +(isImp?'<div class="role-tag tag-imp">Imposter</div>':'<div class="role-tag tag-crew">Your question</div>')
+    +'<div class="qtext" style="margin-top:12px;">'+escapeHtml(q)+'</div></div>';
+  const catEl=document.getElementById('qroleCat');
+  if(!isImp){ catEl.textContent='Category: '+r.category; catEl.style.display=''; }
+  else if(!S.showCategoryToImposter){ catEl.style.display='none'; }
+  let ex='';
+  if(isImp && S.impostersKnowEachOther && r.numImp>1){
+    const mates=[...r.imposters].filter(j=>j!==i).map(j=>S.players[j]);
+    ex+='<div class="coimp"><span class="i">'+icon('users',15)+'</span>Fellow imposter'+(mates.length>1?'s':'')+': <b>'+mates.map(escapeHtml).join(', ')+'</b></div>';
+  }
+  if(isImp) ex+='<div class="coimp">Answer your question naturally — blend in.</div>';
+  document.getElementById('qroleExtra').innerHTML=ex;
+  document.getElementById('qanswerWrap').style.display='';
+  document.getElementById('qroleBack').style.visibility='hidden'; // must answer once revealed
+  const inp=document.getElementById('qanswerInput'); inp.focus();
+}
+function submitQAnswer(){
+  const v=document.getElementById('qanswerInput').value.trim();
+  if(!v){ flash('Type your answer first'); document.getElementById('qanswerInput').focus(); return; }
+  S.round.answers[curPlayer]=v;
+  S.round.seen[curPlayer]=true;
+  go('pass'); renderPass();
+}
+
+/* ================= QUESTIONS: DISCUSS / RESULTS ================= */
+function renderQDiscuss(){
+  const r=S.round;
+  document.getElementById('qMainQuestion').textContent=r.mainQ;
+  document.getElementById('qDiscussCat').textContent='Category: '+r.category;
+  const wrap=document.getElementById('qAnswerList'); wrap.innerHTML='';
+  S.players.forEach((n,i)=>{
+    const row=document.createElement('div'); row.className='ansrow';
+    row.innerHTML=`<div class="av-mini">${initial(n)}</div>
+      <div class="ans-tt"><b>${escapeHtml(n)}</b><span>${escapeHtml(r.answers[i]||'—')}</span></div>`;
+    wrap.appendChild(row);
+  });
+}
+function renderQResults(){
+  const r=S.round;
+  const impWrap=document.getElementById('qImpReveal'); impWrap.innerHTML='';
+  [...r.imposters].forEach(i=>{
+    const c=document.createElement('div'); c.className='imp-card';
+    c.innerHTML=`<div class="ia">${icon('mask',24)}</div><b>${escapeHtml(S.players[i])}</b><span class="role">Imposter</span>`;
+    impWrap.appendChild(c);
+  });
+  document.getElementById('qResMain').textContent=r.mainQ;
+  document.getElementById('qResImp').textContent=r.impQ;
+  const wrap=document.getElementById('qResAnswers'); wrap.innerHTML='';
+  S.players.forEach((n,i)=>{
+    const imp=r.imposters.has(i);
+    const row=document.createElement('div'); row.className='ansrow'+(imp?' imp':'');
+    row.innerHTML=`<div class="av-mini">${initial(n)}</div>
+      <div class="ans-tt"><b>${escapeHtml(n)}</b><span>${escapeHtml(r.answers[i]||'—')}</span></div>`
+      +(imp?'<span class="tag">Imposter</span>':'');
+    wrap.appendChild(row);
+  });
+}
+function newQRound(){
+  const cats=selectedQCategoryNames().filter(c=>poolQFor(c).length);
+  if(!cats.length){ go('qsetup'); return; }
+  buildQRound(cats); go('pass');
+}
 
 /* hook play/results rendering into nav */
 const _go=go;
@@ -980,11 +1372,18 @@ function init(){
   if(Object.keys(S.categories).filter(c=>S.categories[c]).length===0){
     ['Food','Animals','Objects','Countries','Sports'].forEach(c=>S.categories[c]=true);
   }
+  if(Object.keys(S.qCategories).filter(c=>S.qCategories[c]).length===0){
+    QCATEGORY_META.forEach(([n])=>{ if(n!=='Custom Questions') S.qCategories[n]=true; });
+  }
   document.getElementById('themeBtn').onclick=toggleTheme;
   document.getElementById('themeBtn2').onclick=toggleTheme;
+  document.getElementById('themeBtn3').onclick=toggleTheme;
   applyThemeBtns();
+  setMode(S.mode);
   document.getElementById('cwWord').addEventListener('keydown',e=>{if(e.key==='Enter')addCustom();});
   document.getElementById('cwHint').addEventListener('keydown',e=>{if(e.key==='Enter')addCustom();});
+  document.getElementById('qcwImp').addEventListener('keydown',e=>{if(e.key==='Enter')addQCustom();});
+  document.getElementById('qanswerInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitQAnswer();});
   paintIcons();
   renderSetup();
 }

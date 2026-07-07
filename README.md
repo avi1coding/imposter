@@ -1,22 +1,24 @@
 # 🕵️ Imposter
 
-A pass-and-play party word game for **3–99 players** on a single phone — like Spyfall / The Chameleon.
+A pass-and-play party game for **3–99 players** on a single phone — like Spyfall / The Chameleon. Two game modes:
 
-Everyone gets the same secret word… except the **imposter(s)**, who only get a small hint. Take turns saying one related word, then discuss and vote on who's faking.
+- **🃏 Words** — everyone gets the same secret word… except the **imposter(s)**, who only get a small hint. Take turns saying one related word, then discuss and vote.
+- **💬 Questions** — everyone answers the same question… except the imposter(s), who secretly get a *different* question with a similar-sounding answer. Type your answers, reveal them all, and spot whose answer doesn't fit.
 
 **▶ Play it:** open [`index.html`](index.html) in any browser (works offline). On iPhone, use *Share → Add to Home Screen* to play it fullscreen like a native app.
 
 ## Features
 
+- 🃏💬 **Two modes** — Words and Questions — pick one on the home screen
 - 🎨 Purple/black theme with a light-mode (purple/white) toggle
-- 👥 3–99 players with custom names
-- 🕵️ 1–3 imposters, random-per-round option, and "imposter never goes first"
-- 🗂️ **18 categories** · **990 super-common words**, each with a safe 1–2 word imposter hint
-- ✏️ Add your own custom words
+- 👥 3–99 players with custom names · 1–3 imposters (random option, "imposter never goes first")
+- 🗂️ Words: **18 categories · 990 super-common words**, each with a safe 1–2 word imposter hint
+- ❓ Questions: **6 categories · 400+ paired questions**, built so the imposter's answer lands in the same range
+- ✏️ Add your own custom words *and* custom question pairs
 - 🔒 Toggles: show category / show hint / imposters know each other
-- 🎭 Animated role reveal — the word cascades in letter by letter
+- 🎭 Animated reveal — the word cascades in letter by letter
 - 🚫 A role locks the instant it's revealed, so nobody can peek twice
-- 💾 Settings and theme persist between sessions
+- 💾 Settings, mode, and theme persist between sessions
 
 ## How to play
 
