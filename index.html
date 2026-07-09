@@ -391,6 +391,7 @@
 
   /* ===== restructured layout: header, home launcher, roster ===== */
   .topbar{border-bottom:1px solid var(--card-border);padding-bottom:10px;}
+  #home .topbar{border-bottom:none;padding-bottom:0;}
   .brandtag{font-family:var(--mono);font-size:12px;letter-spacing:1.5px;color:var(--muted);font-weight:700;}
   .brandtag span{color:var(--accent);margin:0 1px;}
   .home-hero{margin:24px 0 6px;text-align:center;}
@@ -461,6 +462,20 @@
   .modedots{display:flex;align-items:center;gap:8px;}
   .mdot{width:8px;height:8px;border-radius:50%;border:none;background:var(--card-border);cursor:pointer;transition:all .2s;padding:0;}
   .mdot.on{background:var(--accent);width:24px;border-radius:4px;}
+
+  /* ===== play: discussion briefing ===== */
+  .briefing{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:26px 20px 24px;text-align:center;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+  .briefing::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent2),var(--accent));}
+  .brief-label{font-family:var(--mono);text-transform:uppercase;letter-spacing:2px;font-size:11px;color:var(--muted2);margin-bottom:8px;}
+  .brief-name{font-size:34px;font-weight:850;letter-spacing:-.5px;line-height:1.1;word-break:break-word;}
+  .brief-dir{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;font-size:12.5px;font-weight:700;color:var(--accent);
+    background:var(--accent-soft);border:1px solid var(--card-border);border-radius:999px;padding:8px 16px;}
+  .brief-dir .i{display:inline-flex;}
+  .brief-dir svg{width:18px;height:18px;}
+  .brief-steps{margin-top:22px;}
+  .brief-steps p{color:var(--muted);font-size:14.5px;line-height:1.55;margin:0 0 14px;padding-left:18px;position:relative;}
+  .brief-steps p b{color:var(--text);font-weight:700;}
+  .brief-steps p::before{content:"›";color:var(--accent);font-weight:800;position:absolute;left:2px;top:0;}
 </style>
 </head>
 <body>
@@ -690,25 +705,16 @@
   <!-- ============ PLAY / VOTE ============ -->
   <section id="play" class="screen">
     <div class="topbar"><button class="back" onclick="go('pass')">‹ Back</button><span></span></div>
-    <h2>Discuss &amp; Vote</h2>
-    <p class="sub">Time to talk it out and spot the imposter.</p>
-    <div class="card" style="padding:6px 16px;">
-      <div class="voterow">
-        <div class="vi"><span class="i" data-icon="flag"></span></div>
-        <div class="vt"><b id="startName">—</b><span>starts the round</span></div>
-      </div>
-      <div class="voterow">
-        <div class="vi"><span class="i" data-icon="rotate"></span></div>
-        <div class="vt"><b>Go clockwise</b><span>Then continue in that direction</span></div>
-      </div>
-      <div class="voterow">
-        <div class="vi"><span class="i" data-icon="chat"></span></div>
-        <div class="vt"><b>Say one related word</b><span>Each player gives a clue. Go around 2–3 times.</span></div>
-      </div>
-      <div class="voterow">
-        <div class="vi"><span class="i" data-icon="vote"></span></div>
-        <div class="vt"><b>Vote</b><span>Point at who you think is the imposter, then reveal.</span></div>
-      </div>
+    <h2>Discussion</h2>
+    <p class="sub">Take turns dropping clues, then vote out the imposter.</p>
+    <div class="briefing">
+      <div class="brief-label">First to go</div>
+      <div class="brief-name" id="startName">—</div>
+      <div class="brief-dir" id="dirBadge"></div>
+    </div>
+    <div class="brief-steps">
+      <p>Each player says <b>one word</b> about the secret word — vague enough to stay safe, clear enough to prove you know it.</p>
+      <p>Go around <b>2–3 times</b>, then talk it out and <b>vote</b> on who's faking.</p>
     </div>
     <div class="spacer"></div>
     <button class="btn btn-primary" onclick="revealResults()"><span class="i" data-icon="masks" data-size="20"></span>Reveal Results</button>
@@ -1392,7 +1398,7 @@ function buildRound(cats){
   const start=startPool[Math.floor(Math.random()*startPool.length)];
   S.round={
     category:cat, word:pick.w, hint:pick.h||'',
-    imposters, numImp, start,
+    imposters, numImp, start, dir:(Math.random()<0.5?'cw':'ccw'),
     seen:new Array(n).fill(false)
   };
   renderPass();
@@ -1492,7 +1498,11 @@ function finishReveal(){
 
 /* ================= PLAY / RESULTS ================= */
 function renderPlay(){
-  document.getElementById('startName').textContent=S.players[S.round.start];
+  const r=S.round;
+  document.getElementById('startName').textContent=S.players[r.start];
+  const cw = r.dir!=='ccw';
+  const badge=document.getElementById('dirBadge');
+  badge.innerHTML='<span class="i"'+(cw?'':' style="transform:scaleX(-1)"')+'>'+icon('rotate',18)+'</span>'+(cw?'Clockwise':'Counter-clockwise');
 }
 function renderResults(){
   const r=S.round;
@@ -1829,7 +1839,7 @@ function buildURound(cats){
   const idx=[...Array(n).keys()]; shuffle(idx);
   const imposters=new Set(idx.slice(0,numImp));
   const start=Math.floor(Math.random()*n);
-  S.round={ u:true, category:cat, crewWord, impWord, imposters, numImp, start, seen:new Array(n).fill(false) };
+  S.round={ u:true, category:cat, crewWord, impWord, imposters, numImp, start, dir:(Math.random()<0.5?'cw':'ccw'), seen:new Array(n).fill(false) };
   renderPass();
 }
 function openURole(i){
