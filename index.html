@@ -438,6 +438,32 @@
   .grid2{grid-template-columns:1fr;}
   .grid2 .tile{flex-direction:row;align-items:center;gap:14px;}
   .grid2 .tile .tt span{white-space:nowrap;}
+
+  /* ===== home: mode carousel ===== */
+  .home-top{margin-top:22px;text-align:center;}
+  .home-top .home-lockup{margin-bottom:10px;}
+  .home-top .brandmark{width:52px;height:52px;border-radius:16px;margin:0;}
+  .home-top .brandmark svg{width:29px;height:29px;}
+  .home-top .brand{font-size:38px;letter-spacing:-1.4px;}
+  .carousel{position:relative;}
+  .modetrack{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .modetrack::-webkit-scrollbar{display:none;}
+  .modeslide{flex:0 0 100%;scroll-snap-align:center;padding:4px 3px;}
+  .ms-card{border:1px solid var(--card-border);background:var(--card);border-radius:22px;padding:32px 24px;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;align-items:center;text-align:center;gap:13px;min-height:290px;justify-content:center;position:relative;overflow:hidden;}
+  .ms-card::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent2),var(--accent));}
+  .ms-ic{width:92px;height:92px;border-radius:26px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);box-shadow:0 0 42px rgba(79,176,255,.22);}
+  .ms-ic svg{width:44px;height:44px;}
+  .ms-idx{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--accent);opacity:.85;text-transform:uppercase;}
+  .ms-name{font-size:29px;font-weight:850;letter-spacing:-.5px;}
+  .ms-desc{font-size:14px;color:var(--muted);line-height:1.5;max-width:270px;}
+  .carctrl{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:16px;}
+  .car-arrow{width:38px;height:38px;border-radius:50%;border:1px solid var(--card-border);background:var(--card-solid);color:var(--text);
+    display:grid;place-items:center;cursor:pointer;font-size:20px;line-height:1;padding:0;}
+  .car-arrow:active{transform:scale(.92);}
+  .modedots{display:flex;align-items:center;gap:8px;}
+  .mdot{width:8px;height:8px;border-radius:50%;border:none;background:var(--card-border);cursor:pointer;transition:all .2s;padding:0;}
+  .mdot.on{background:var(--accent);width:24px;border-radius:4px;}
 </style>
 </head>
 <body>
@@ -447,23 +473,23 @@
   <section id="home" class="screen active">
     <div class="topbar"><span class="brandtag">IMPOSTER<span>//</span>OS</span>
       <button class="icon-btn" id="themeBtn" title="Toggle theme"></button></div>
-    <div class="home-hero">
-      <div class="kicker">Social Deduction · Pass &amp; Play</div>
+    <div class="home-top">
       <div class="home-lockup">
-        <div class="brandmark framed"><span class="i" data-icon="mask" data-size="34"></span></div>
+        <div class="brandmark framed"><span class="i" data-icon="mask" data-size="30"></span></div>
         <h1 class="brand">IMPOSTER</h1>
       </div>
-      <p class="tagline" id="tagline">Everyone gets the same word, except the imposter. Find out who they are.</p>
-    </div>
-    <div class="mono-label"><span class="ml-line"></span>Select a mode</div>
-    <div class="modelist">
-      <button class="modecard" onclick="launchMode('word')"><span class="mc-n">01</span><span class="mc-ic"><span class="i" data-icon="grid" data-size="25"></span></span><span class="mc-tt"><b>Words</b><span>Everyone shares a secret word — one faker fakes it.</span></span><span class="mc-go">›</span></button>
-      <button class="modecard" onclick="launchMode('questions')"><span class="mc-n">02</span><span class="mc-ic"><span class="i" data-icon="chat" data-size="25"></span></span><span class="mc-tt"><b>Questions</b><span>Same question for all — the imposter's is sneakily different.</span></span><span class="mc-go">›</span></button>
-      <button class="modecard" onclick="launchMode('undercover')"><span class="mc-n">03</span><span class="mc-ic"><span class="i" data-icon="mask" data-size="25"></span></span><span class="mc-tt"><b>Undercover</b><span>Everyone's word has a look-alike — describe yours.</span></span><span class="mc-go">›</span></button>
-      <button class="modecard" onclick="launchMode('wavelength')"><span class="mc-n">04</span><span class="mc-ic"><span class="i" data-icon="slider" data-size="25"></span></span><span class="mc-tt"><b>Wavelength</b><span>Rate it on a scale — the imposter rates a different thing.</span></span><span class="mc-go">›</span></button>
+      <div class="kicker">Social Deduction · Pass &amp; Play</div>
     </div>
     <div class="spacer"></div>
-    <button class="btn btn-ghost" onclick="openRules()"><span class="i" data-icon="book" data-size="20"></span>How to Play</button>
+    <div class="carousel"><div class="modetrack" id="modeTrack"></div></div>
+    <div class="carctrl">
+      <button class="car-arrow" onclick="goMode(curMode-1)" aria-label="Previous">‹</button>
+      <div class="modedots" id="modeDots"></div>
+      <button class="car-arrow" onclick="goMode(curMode+1)" aria-label="Next">›</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" id="playBtn" onclick="playCurrent()"><span class="i" data-icon="play" data-size="20"></span>Play</button>
+    <button class="btn btn-ghost" style="margin-top:11px;" onclick="openRules()"><span class="i" data-icon="book" data-size="20"></span>How to Play</button>
     <p class="modal-note" id="homeNote">3–99 players · one device</p>
   </section>
 
@@ -1123,6 +1149,18 @@ function paintIcons(root){
   });
 }
 
+/* ================= GAME MODES =================
+   Single source of truth for the home carousel. To add a new game option,
+   add one entry here (id, name, icon, its setup screen id, description) and
+   it appears in the carousel automatically — the home never runs out of room.
+   (A brand-new mode also needs its own setup/reveal screens + build logic.) */
+const MODES=[
+  {id:'word',       name:'Words',      icon:'grid',   setup:'setup',  desc:'Everyone shares a secret word — one faker has to fake it.'},
+  {id:'questions',  name:'Questions',  icon:'chat',   setup:'qsetup', desc:"Everyone answers the same question — the imposter's is sneakily different."},
+  {id:'undercover', name:'Undercover', icon:'mask',   setup:'usetup', desc:"Everyone's word has a look-alike — describe yours to blend in."},
+  {id:'wavelength', name:'Wavelength', icon:'slider', setup:'wsetup', desc:'Rate something on a scale — the imposter rates a different thing.'},
+];
+
 /* ================= STATE ================= */
 const S = {
   players:["Player 1","Player 2","Player 3","Player 4"],
@@ -1478,7 +1516,7 @@ function newRound(){
 function confirmQuit(){ go(setupScreen()); }
 
 /* ================= MODE / NAV HELPERS ================= */
-function setupScreen(){ return {word:'setup',questions:'qsetup',undercover:'usetup',wavelength:'wsetup'}[S.mode]||'setup'; }
+function setupScreen(){ const m=MODES.find(x=>x.id===S.mode); return m?m.setup:'setup'; }
 function setMode(m){
   S.mode=m;
   document.querySelectorAll('#modeSeg .modeseg-btn').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
@@ -1492,6 +1530,45 @@ function setMode(m){
 }
 function startRound(){ go(setupScreen()); }
 function launchMode(m){ setMode(m); go(setupScreen()); }
+
+/* ===== home mode carousel (data-driven from MODES) ===== */
+let curMode=0;
+function renderHome(){
+  const track=document.getElementById('modeTrack'); if(!track) return;
+  track.innerHTML='';
+  MODES.forEach((m,i)=>{
+    const s=document.createElement('div'); s.className='modeslide';
+    s.innerHTML='<div class="ms-card"><div class="ms-ic">'+icon(m.icon,44)+'</div>'
+      +'<div class="ms-idx">Mode '+String(i+1).padStart(2,'0')+' / '+String(MODES.length).padStart(2,'0')+'</div>'
+      +'<div class="ms-name">'+escapeHtml(m.name)+'</div>'
+      +'<div class="ms-desc">'+escapeHtml(m.desc)+'</div></div>';
+    track.appendChild(s);
+  });
+  const dots=document.getElementById('modeDots'); dots.innerHTML='';
+  MODES.forEach((m,i)=>{ const d=document.createElement('button'); d.className='mdot'; d.onclick=()=>goMode(i); dots.appendChild(d); });
+  curMode=Math.max(0, MODES.findIndex(m=>m.id===S.mode));
+  track.scrollLeft = curMode*track.clientWidth;
+  updateModeUI();
+}
+function goMode(i){
+  const track=document.getElementById('modeTrack'); if(!track) return;
+  curMode=(i+MODES.length)%MODES.length;   // wrap around
+  track.scrollTo({left:curMode*track.clientWidth, behavior:'smooth'});
+  updateModeUI();
+}
+let _mScrollT;
+function onTrackScroll(){
+  const track=document.getElementById('modeTrack');
+  clearTimeout(_mScrollT);
+  _mScrollT=setTimeout(()=>{ const w=track.clientWidth||1; const i=Math.round(track.scrollLeft/w); if(i!==curMode && i>=0 && i<MODES.length){ curMode=i; updateModeUI(); } },70);
+}
+function updateModeUI(){
+  document.querySelectorAll('#modeDots .mdot').forEach((d,i)=>d.classList.toggle('on',i===curMode));
+  const m=MODES[curMode]; if(!m) return;
+  setMode(m.id);
+  const pb=document.getElementById('playBtn'); if(pb) pb.innerHTML=icon('play',20)+'Play '+escapeHtml(m.name);
+}
+function playCurrent(){ launchMode(MODES[curMode].id); }
 function openRules(){
   const m=S.mode;
   document.getElementById('rulesWord').style.display=m==='word'?'':'none';
@@ -2033,6 +2110,8 @@ function init(){
   document.getElementById('ucwB').addEventListener('keydown',e=>{if(e.key==='Enter')addUCustom();});
   document.getElementById('wcwImp').addEventListener('keydown',e=>{if(e.key==='Enter')addWCustom();});
   paintIcons();
+  renderHome();
+  document.getElementById('modeTrack').addEventListener('scroll',onTrackScroll,{passive:true});
   renderSetup();
 }
 window.addEventListener('DOMContentLoaded',init);
