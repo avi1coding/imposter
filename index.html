@@ -45,11 +45,6 @@
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
   }
-  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
-    background-size:34px 34px;
-    -webkit-mask-image:radial-gradient(125% 100% at 50% 0%,#000 45%,transparent 92%);
-    mask-image:radial-gradient(125% 100% at 50% 0%,#000 45%,transparent 92%);}
   #app{
     position:relative;z-index:1;
     max-width:520px;margin:0 auto;min-height:100vh;min-height:100dvh;
@@ -446,7 +441,9 @@
   .home-top .brandmark svg{width:29px;height:29px;}
   .home-top .brand{font-size:38px;letter-spacing:-1.4px;}
   .carousel{position:relative;}
-  .modetrack{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .modetrack{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+    touch-action:pan-x;overscroll-behavior-x:contain;cursor:grab;}
+  .modetrack.dragging{cursor:grabbing;scroll-snap-type:none;}
   .modetrack::-webkit-scrollbar{display:none;}
   .modeslide{flex:0 0 100%;scroll-snap-align:center;padding:4px 3px;}
   .ms-card{border:1px solid var(--card-border);background:var(--card);border-radius:22px;padding:32px 24px;box-shadow:var(--shadow);
@@ -471,7 +468,7 @@
 
   <!-- ============ HOME ============ -->
   <section id="home" class="screen active">
-    <div class="topbar"><span class="brandtag">IMPOSTER<span>//</span>OS</span>
+    <div class="topbar"><span></span>
       <button class="icon-btn" id="themeBtn" title="Toggle theme"></button></div>
     <div class="home-top">
       <div class="home-lockup">
@@ -719,7 +716,7 @@
 
   <!-- ============ RESULTS ============ -->
   <section id="results" class="screen">
-    <div class="topbar"><span></span><span></span></div>
+    <div class="topbar"><button class="back" onclick="go('play')">‹ Back</button><span></span></div>
     <h2 style="text-align:center;display:flex;align-items:center;justify-content:center;gap:10px;"><span class="i" data-icon="masks" data-size="26" style="color:var(--accent)"></span>The reveal</h2>
     <div class="result-word">
       <div class="lbl">The word was</div>
@@ -838,7 +835,7 @@
 
   <!-- ============ QUESTIONS: RESULTS ============ -->
   <section id="qresults" class="screen">
-    <div class="topbar"><span></span><span></span></div>
+    <div class="topbar"><button class="back" onclick="go('qdiscuss')">‹ Back</button><span></span></div>
     <h2 style="text-align:center;display:flex;align-items:center;justify-content:center;gap:10px;"><span class="i" data-icon="masks" data-size="26" style="color:var(--accent)"></span>The reveal</h2>
     <div class="imp-reveal" id="qImpReveal" style="margin-top:8px;"></div>
     <div class="qpair">
@@ -912,7 +909,7 @@
 
   <!-- ============ UNDERCOVER: RESULTS ============ -->
   <section id="uresults" class="screen">
-    <div class="topbar"><span></span><span></span></div>
+    <div class="topbar"><button class="back" onclick="go('play')">‹ Back</button><span></span></div>
     <h2 style="text-align:center;display:flex;align-items:center;justify-content:center;gap:10px;"><span class="i" data-icon="masks" data-size="26" style="color:var(--accent)"></span>The reveal</h2>
     <div class="imp-reveal" id="uImpReveal" style="margin-top:8px;"></div>
     <div class="qpair">
@@ -1001,7 +998,7 @@
 
   <!-- ============ WAVELENGTH: RESULTS ============ -->
   <section id="wresults" class="screen">
-    <div class="topbar"><span></span><span></span></div>
+    <div class="topbar"><button class="back" onclick="go('wdiscuss')">‹ Back</button><span></span></div>
     <h2 style="text-align:center;display:flex;align-items:center;justify-content:center;gap:10px;"><span class="i" data-icon="masks" data-size="26" style="color:var(--accent)"></span>The reveal</h2>
     <div class="imp-reveal" id="wImpReveal" style="margin-top:8px;"></div>
     <div class="qpair">
@@ -1706,7 +1703,7 @@ function doQReveal(){
   // category was already shown/hidden uniformly on the covered screen (per showCategoryToImposter) — leave it as-is
   document.getElementById('qroleExtra').innerHTML='';
   document.getElementById('qanswerWrap').style.display='';
-  document.getElementById('qroleBack').style.visibility='hidden'; // must answer once revealed
+  document.getElementById('qroleBack').style.visibility='visible'; // back stays available; a player isn't "seen" until they submit
   document.getElementById('qanswerInput').focus();
 }
 function submitQAnswer(){
@@ -1978,7 +1975,7 @@ function doWReveal(){
   document.getElementById('wRightLbl').textContent=r.right;
   const sl=document.getElementById('wSlider'); sl.value=(r.positions[i]!=null?r.positions[i]:50);
   document.getElementById('wsliderWrap').style.display='';
-  document.getElementById('wroleBack').style.visibility='hidden';
+  document.getElementById('wroleBack').style.visibility='visible';
 }
 function submitWPosition(){
   S.round.positions[curPlayer]=+document.getElementById('wSlider').value;
@@ -2111,7 +2108,14 @@ function init(){
   document.getElementById('wcwImp').addEventListener('keydown',e=>{if(e.key==='Enter')addWCustom();});
   paintIcons();
   renderHome();
-  document.getElementById('modeTrack').addEventListener('scroll',onTrackScroll,{passive:true});
+  const tr=document.getElementById('modeTrack');
+  tr.addEventListener('scroll',onTrackScroll,{passive:true});
+  // mouse drag-to-scroll (touch already scrolls natively)
+  let down=false,sx=0,sl=0;
+  tr.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse')return; down=true;sx=e.clientX;sl=tr.scrollLeft;tr.classList.add('dragging');tr.setPointerCapture(e.pointerId); });
+  tr.addEventListener('pointermove',e=>{ if(!down)return; tr.scrollLeft=sl-(e.clientX-sx); });
+  const endDrag=()=>{ if(!down)return; down=false;tr.classList.remove('dragging'); goMode(Math.round(tr.scrollLeft/(tr.clientWidth||1))); };
+  tr.addEventListener('pointerup',endDrag); tr.addEventListener('pointercancel',endDrag);
   renderSetup();
 }
 window.addEventListener('DOMContentLoaded',init);
