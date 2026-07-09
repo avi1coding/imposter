@@ -393,6 +393,51 @@
   h2{position:relative;}
   h2::before{content:"";display:inline-block;width:4px;height:20px;border-radius:2px;margin-right:11px;vertical-align:-2px;
     background:linear-gradient(var(--accent2),var(--accent));box-shadow:0 0 12px rgba(79,176,255,.5);}
+
+  /* ===== restructured layout: header, home launcher, roster ===== */
+  .topbar{border-bottom:1px solid var(--card-border);padding-bottom:10px;}
+  .brandtag{font-family:var(--mono);font-size:12px;letter-spacing:1.5px;color:var(--muted);font-weight:700;}
+  .brandtag span{color:var(--accent);margin:0 1px;}
+  .home-hero{margin:24px 0 6px;text-align:center;}
+  .home-lockup{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:12px;}
+  .home-hero .brandmark{width:58px;height:58px;border-radius:17px;margin:0;}
+  .home-hero .brandmark svg{width:32px;height:32px;}
+  .home-hero .brand{font-size:40px;letter-spacing:-1.4px;}
+  .home-hero .kicker{margin-bottom:16px;}
+  .mono-label{font-family:var(--mono);text-transform:uppercase;letter-spacing:2px;font-size:11px;color:var(--muted2);
+    margin:10px 2px 12px;display:flex;align-items:center;gap:10px;}
+  .mono-label .ml-line{flex:none;width:22px;height:2px;background:var(--accent);border-radius:2px;}
+  .modelist{display:flex;flex-direction:column;gap:11px;}
+  .modecard{display:flex;align-items:center;gap:13px;width:100%;text-align:left;border:1px solid var(--card-border);
+    background:var(--card);border-radius:16px;padding:15px 16px 15px 17px;color:var(--text);cursor:pointer;position:relative;overflow:hidden;
+    transition:transform .12s,border-color .12s;box-shadow:var(--shadow);}
+  .modecard:active{transform:scale(.985);border-color:var(--accent);}
+  .modecard::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(var(--accent2),var(--accent));}
+  .modecard .mc-n{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);opacity:.7;flex:none;}
+  .modecard .mc-ic{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none;}
+  .modecard .mc-ic svg{width:24px;height:24px;}
+  .modecard .mc-tt{flex:1;min-width:0;}
+  .modecard .mc-tt b{display:block;font-size:16.5px;font-weight:750;}
+  .modecard .mc-tt span{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35;}
+  .modecard .mc-go{color:var(--muted2);font-size:22px;flex:none;}
+  .roster{display:flex;flex-direction:column;gap:10px;margin-top:8px;}
+  .prow2{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:1px solid var(--card-border);
+    background:var(--card);border-radius:14px;padding:12px 15px;color:var(--text);cursor:pointer;position:relative;overflow:hidden;transition:transform .1s;}
+  .prow2:active{transform:scale(.99);}
+  .prow2::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(var(--accent2),var(--accent));}
+  .prow2 .pav{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:16px;font-weight:800;color:#fff;flex:none;
+    background:radial-gradient(circle at 35% 30%,#7bc8ff,#3f88f0 55%,#123a86);}
+  .prow2 .pav svg{width:20px;height:20px;stroke:#fff;}
+  .prow2 .pnm{flex:1;font-size:16px;font-weight:700;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .prow2 .pst{font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--accent);display:flex;align-items:center;gap:6px;flex:none;text-transform:uppercase;}
+  .prow2 .pst .i svg{width:15px;height:15px;}
+  .prow2.done{opacity:.6;}
+  .prow2.done::after{background:var(--muted2);}
+  .prow2.done .pav{background:radial-gradient(circle at 35% 30%,#64748b,#475569 60%,#334155);}
+  .prow2.done .pst{color:var(--good);}
+  .grid2{grid-template-columns:1fr;}
+  .grid2 .tile{flex-direction:row;align-items:center;gap:14px;}
+  .grid2 .tile .tt span{white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -400,29 +445,26 @@
 
   <!-- ============ HOME ============ -->
   <section id="home" class="screen active">
-    <div class="topbar">
-      <span></span>
-      <button class="icon-btn" id="themeBtn" title="Toggle theme"></button>
-    </div>
-    <div class="spacer"></div>
-    <div style="text-align:center;">
+    <div class="topbar"><span class="brandtag">IMPOSTER<span>//</span>OS</span>
+      <button class="icon-btn" id="themeBtn" title="Toggle theme"></button></div>
+    <div class="home-hero">
       <div class="kicker">Social Deduction · Pass &amp; Play</div>
-      <div class="brandmark framed"><span class="i" data-icon="mask" data-size="54"></span></div>
-      <h1 class="brand">IMPOSTER</h1>
+      <div class="home-lockup">
+        <div class="brandmark framed"><span class="i" data-icon="mask" data-size="34"></span></div>
+        <h1 class="brand">IMPOSTER</h1>
+      </div>
       <p class="tagline" id="tagline">Everyone gets the same word, except the imposter. Find out who they are.</p>
     </div>
+    <div class="mono-label"><span class="ml-line"></span>Select a mode</div>
+    <div class="modelist">
+      <button class="modecard" onclick="launchMode('word')"><span class="mc-n">01</span><span class="mc-ic"><span class="i" data-icon="grid" data-size="25"></span></span><span class="mc-tt"><b>Words</b><span>Everyone shares a secret word — one faker fakes it.</span></span><span class="mc-go">›</span></button>
+      <button class="modecard" onclick="launchMode('questions')"><span class="mc-n">02</span><span class="mc-ic"><span class="i" data-icon="chat" data-size="25"></span></span><span class="mc-tt"><b>Questions</b><span>Same question for all — the imposter's is sneakily different.</span></span><span class="mc-go">›</span></button>
+      <button class="modecard" onclick="launchMode('undercover')"><span class="mc-n">03</span><span class="mc-ic"><span class="i" data-icon="mask" data-size="25"></span></span><span class="mc-tt"><b>Undercover</b><span>Everyone's word has a look-alike — describe yours.</span></span><span class="mc-go">›</span></button>
+      <button class="modecard" onclick="launchMode('wavelength')"><span class="mc-n">04</span><span class="mc-ic"><span class="i" data-icon="slider" data-size="25"></span></span><span class="mc-tt"><b>Wavelength</b><span>Rate it on a scale — the imposter rates a different thing.</span></span><span class="mc-go">›</span></button>
+    </div>
     <div class="spacer"></div>
-    <div class="modeseg" id="modeSeg">
-      <button class="modeseg-btn on" data-mode="word" onclick="setMode('word')"><span class="i" data-icon="grid" data-size="17"></span>Words</button>
-      <button class="modeseg-btn" data-mode="questions" onclick="setMode('questions')"><span class="i" data-icon="chat" data-size="17"></span>Questions</button>
-      <button class="modeseg-btn" data-mode="undercover" onclick="setMode('undercover')"><span class="i" data-icon="mask" data-size="17"></span>Undercover</button>
-      <button class="modeseg-btn" data-mode="wavelength" onclick="setMode('wavelength')"><span class="i" data-icon="slider" data-size="17"></span>Wavelength</button>
-    </div>
-    <div class="stack" style="margin-top:14px;">
-      <button class="btn btn-primary" onclick="startRound()"><span class="i" data-icon="play" data-size="20"></span>Start Round</button>
-      <button class="btn btn-ghost" onclick="openRules()"><span class="i" data-icon="book" data-size="20"></span>Explain Rules</button>
-    </div>
-    <p class="modal-note" id="homeNote">Pass-and-play · 3–99 players · one device</p>
+    <button class="btn btn-ghost" onclick="openRules()"><span class="i" data-icon="book" data-size="20"></span>How to Play</button>
+    <p class="modal-note" id="homeNote">3–99 players · one device</p>
   </section>
 
   <!-- ============ RULES ============ -->
@@ -1323,14 +1365,16 @@ function buildRound(cats){
 
 /* ================= PASS / REVEAL GRID ================= */
 function renderPass(){
-  const g=document.getElementById('pgrid'); g.innerHTML='';
+  const g=document.getElementById('pgrid'); g.innerHTML=''; g.className='roster';
   S.players.forEach((n,i)=>{
     const seen=S.round.seen[i];
-    const c=document.createElement('div');
-    c.className='pcard'+(seen?' done':'');
-    c.innerHTML=`<div class="av q">${seen?icon('lock',34):initial(n)}</div><div class="pn">${escapeHtml(n)}</div>`;
-    c.onclick = seen ? (()=>flash('Already revealed — pass the phone')) : (()=>openReveal(i));
-    g.appendChild(c);
+    const row=document.createElement('button');
+    row.className='prow2'+(seen?' done':'');
+    row.innerHTML=`<span class="pav">${seen?icon('lock',20):initial(n)}</span>`
+      +`<span class="pnm">${escapeHtml(n)}</span>`
+      +`<span class="pst">${seen?'Revealed':'<span class="i">'+icon('eye',15)+'</span>Reveal'}</span>`;
+    row.onclick = seen ? (()=>flash('Already revealed — pass the phone')) : (()=>openReveal(i));
+    g.appendChild(row);
   });
   updateSeen();
 }
@@ -1447,6 +1491,7 @@ function setMode(m){
   save();
 }
 function startRound(){ go(setupScreen()); }
+function launchMode(m){ setMode(m); go(setupScreen()); }
 function openRules(){
   const m=S.mode;
   document.getElementById('rulesWord').style.display=m==='word'?'':'none';
